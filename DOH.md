@@ -16,7 +16,7 @@ The classic benchmark remains the default and is not replaced.
 - 12 test hostnames (same default host list as the reference site): google.com, youtube.com, facebook.com, instagram.com, chatgpt.com, x.com, whatsapp.com, reddit.com, wikipedia.org, amazon.com, tiktok.com, pinterest.com.
 - One warm-up query per hostname, followed by two measured rounds (24 measured samples).
 - All transfers for one resolver run inside a single curl process. curl's connection cache can therefore reuse the HTTPS connection between warm-up and measured requests.
-- HTTP 200 plus DNS transaction-ID, response-bit and NOERROR checks are required for a successful sample.
+- HTTP 200 plus DNS transaction-ID and response-bit checks, accepting NOERROR and NXDOMAIN replies as valid DNS responses are required for a successful sample.
 - Failed measured requests receive the same 5000 ms penalty used by the reference site's methodology.
 - The report includes Min, Median, Average, Max and success count, ranked by Average.
 

@@ -39,7 +39,7 @@ jobs:
           test "$dot_count" -eq 13
           doh_count="$(sed -n "/^DEFAULT_DOH_SERVERS='/,/^'$/p" doh-bench.sh | grep -c '|')"
           test "$doh_count" -eq 26
-          host_count="$(sed -n "s/^DOMAINS='//p" doh-bench.sh | awk '{print NF}')"
+          host_count="$(sed -n "s/^DEFAULT_DOMAINS='//p" doh-bench.sh | awk '{print NF}')"
           test "$host_count" -eq 12
           grep -Fq -- '--next' doh-bench.sh
           grep -Fq -- '--resolve' doh-bench.sh
@@ -72,3 +72,29 @@ jobs:
           grep -Fq 'latest-top4.txt, latest-doh.txt' uninstall.sh
           grep -Fq '/root/backup/dns/' uninstall.sh
           echo "Validated: UDP/TCP=$dns_count, DoT=$dot_count, DoH=$doh_count, hosts=$host_count"
+
+  live-doh-smoke:
+    needs: shell-validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Smoke-test real public DoH endpoints
+        env:
+          DNSTEST_DOH_SERVERS: |
+            Cloudflare|1.1.1.1|cloudflare-dns.com|/dns-query|GET
+            Google|8.8.8.8|dns.google|/dns-query|GET
+            Quad9|9.9.9.9|dns.quad9.net|/dns-query|GET
+          DNSTEST_DOMAINS: "example.com github.com openwrt.org"
+          DNSTEST_ROUNDS: "1"
+          DNSTEST_WARMUP_ROUNDS: "1"
+          DNSTEST_QUERY_TIMEOUT: "4"
+          DNSTEST_SERVER_LIMIT: "15"
+          DNSTEST_DIR: "${{ runner.temp }}/doh-smoke"
+          DNSTEST_CA_FILE: "/etc/ssl/certs/ca-certificates.crt"
+        run: |
+          mkdir -p "$DNSTEST_DIR"
+          sh doh-bench.sh
+          test -s "$DNSTEST_DIR/latest-doh.txt"
+          grep -q 'DNS OVER HTTPS BENCHMARK / FLINT 2' "$DNSTEST_DIR/latest-doh.txt"

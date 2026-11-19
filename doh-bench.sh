@@ -16,7 +16,8 @@ QUERY_TIMEOUT="${DNSTEST_QUERY_TIMEOUT:-5}"
 SERVER_LIMIT="${DNSTEST_SERVER_LIMIT:-25}"
 TIMEOUT_PENALTY=5000
 VERSION='2.0.0'
-DOMAINS="${DNSTEST_DOMAINS:-google.com youtube.com facebook.com instagram.com chatgpt.com x.com whatsapp.com reddit.com wikipedia.org amazon.com tiktok.com pinterest.com}"
+DEFAULT_DOMAINS='google.com youtube.com facebook.com instagram.com chatgpt.com x.com whatsapp.com reddit.com wikipedia.org amazon.com tiktok.com pinterest.com'
+DOMAINS="${DNSTEST_DOMAINS:-$DEFAULT_DOMAINS}"
 
 # Name|IPv4|TLS hostname|DoH path|HTTP method
 # RFC 8484 wire-format DoH over HTTPS GET, matching the reference site's browser fallback.

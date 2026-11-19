@@ -64,6 +64,7 @@ install_timeout() {
 install_curl() {
     if command -v curl >/dev/null 2>&1; then
         curl --version 2>&1 | grep -qi 'https' || die 'curl exists but has no HTTPS/TLS support.'
+        curl --help all 2>&1 | grep -q -- '--noproxy' || die 'curl lacks --noproxy support.'
         curl --help all 2>&1 | grep -q -- '--resolve' || die 'curl lacks --resolve support.'
         curl --help all 2>&1 | grep -q -- '--next' || die 'curl lacks --next support required for connection reuse.'
         curl --help all 2>&1 | grep -q -- '--write-out' || die 'curl lacks --write-out timing support.'
@@ -82,6 +83,7 @@ install_curl() {
 
     command -v curl >/dev/null 2>&1 || die 'curl package installed but executable was not found.'
     curl --version 2>&1 | grep -qi 'https' || die 'Installed curl has no HTTPS/TLS support.'
+    curl --help all 2>&1 | grep -q -- '--noproxy' || die 'Installed curl lacks --noproxy support.'
     curl --help all 2>&1 | grep -q -- '--resolve' || die 'Installed curl lacks --resolve support.'
     curl --help all 2>&1 | grep -q -- '--next' || die 'Installed curl lacks --next support.'
     curl --help all 2>&1 | grep -q -- '--write-out' || die 'Installed curl lacks --write-out timing support.'

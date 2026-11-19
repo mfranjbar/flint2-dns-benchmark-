@@ -164,7 +164,7 @@ DOT_COUNT="$(sed -n "/^DOT_SERVERS='/,/^'$/p" "$WORK/dns-bench.sh" | grep -c '|'
 [ "$DNS_COUNT" = 25 ] || die "DNS server count mismatch: $DNS_COUNT (expected 25)."
 [ "$DOT_COUNT" = 13 ] || die "DoT server count mismatch: $DOT_COUNT (expected 13)."
 DOH_COUNT="$(sed -n "/^DOH_SERVERS='/,/^'$/p" "$WORK/doh-bench.sh" | grep -c '|')"
-[ "$DOH_COUNT" = 16 ] || die "DoH server count mismatch: $DOH_COUNT (expected 16)."
+[ "$DOH_COUNT" = 26 ] || die "DoH server count mismatch: $DOH_COUNT (expected 26)."
 
 # Verify that the downloaded files belong to this project version.
 grep -q 'mkdir "\$TMP"' "$WORK/dns-bench.sh" || die 'Benchmark is missing temporary-directory creation.'

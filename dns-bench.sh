@@ -13,6 +13,20 @@ QUERY_TIMEOUT=3
 DOT_TIMEOUT=4
 HARD_LIMIT=8
 
+# Optional DoH module. The classic benchmark remains the default.
+case "${1:-}" in
+    --doh)
+        shift
+        exec "$DIR/doh-bench.sh" "$@"
+        ;;
+    --all)
+        [ "$#" -eq 1 ] || { echo 'Usage: dnstest --all'; exit 1; }
+        "$0" || exit $?
+        "$DIR/doh-bench.sh"
+        exit $?
+        ;;
+esac
+
 DOMAINS='github.com nasa.gov openwrt.org'
 DOT_DOMAIN='example.com'
 
@@ -345,7 +359,7 @@ if [ "$1" = --check ]; then
 fi
 
 if [ "$1" = --help ]; then
-    echo 'Usage: dnstest [--check|--help]'
+    echo 'Usage: dnstest [--check|--help|--doh [--check]|--all]'
     exit 0
 fi
 

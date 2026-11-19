@@ -18,9 +18,7 @@ WORK_BASE='/tmp/flint2-dns-install'
 say() { printf '%s\n' "$*"; }
 die() { say "ERROR: $*"; exit 1; }
 
-WORK="$(mktemp -d "$WORK_BASE.XXXXXX")" || die 'Could not create unique work directory.'
-RUN_ID="${WORK##*.}"
-BACKUP="$BACKUP_ROOT/flint2-$STAMP-$RUN_ID"
+
 
 install_kdig() {
     if command -v kdig >/dev/null 2>&1; then
@@ -60,14 +58,9 @@ say
 
 [ "$(id -u 2>/dev/null)" = 0 ] || die 'Run this installer as root.'
 
-say '===== STEP 1: CHECK / INSTALL KDIG ====='
-install_kdig
-
-say
-say '===== STEP 2: PREPARE DIRECTORIES ====='
-mkdir -p "$DIR" "$BACKUP_ROOT" /etc/profile.d "$WORK" || die 'Could not create required directories.'
-[ -d "$DIR" ] && [ -w "$DIR" ] || die "Benchmark directory is not writable: $DIR"
-say "Benchmark directory ready: $DIR"
+WORK="$(mktemp -d "$WORK_BASE.XXXXXX")" || die 'Could not create unique work directory.'
+RUN_ID="${WORK##*.}"
+BACKUP="$BACKUP_ROOT/flint2-$STAMP-$RUN_ID"
 
 cleanup() {
     rm -f "$DIR/.dns-bench.sh.new-$RUN_ID" "/etc/profile.d/.40-dnstest-dashboard.sh.new-$RUN_ID"
@@ -76,6 +69,15 @@ cleanup() {
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
+
+say '===== STEP 1: CHECK / INSTALL KDIG ====='
+install_kdig
+
+say
+say '===== STEP 2: PREPARE DIRECTORIES ====='
+mkdir -p "$DIR" "$BACKUP_ROOT" /etc/profile.d "$WORK" || die 'Could not create required directories.'
+[ -d "$DIR" ] && [ -w "$DIR" ] || die "Benchmark directory is not writable: $DIR"
+say "Benchmark directory ready: $DIR"
 
 say
 say '===== STEP 3: DOWNLOAD PROJECT FILES ====='

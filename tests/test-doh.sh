@@ -15,7 +15,7 @@ case "${1:-}" in
         exit 0
         ;;
     --help)
-        echo '--resolve --next --cacert --write-out'
+        echo '--noproxy --resolve --next --cacert --write-out'
         exit 0
         ;;
 esac

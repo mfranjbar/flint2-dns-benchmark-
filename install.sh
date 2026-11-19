@@ -61,6 +61,31 @@ install_timeout() {
     say "timeout installed and verified: $(command -v timeout)"
 }
 
+install_curl() {
+    if command -v curl >/dev/null 2>&1; then
+        curl --version 2>&1 | grep -qi 'https' || die 'curl exists but has no HTTPS/TLS support.'
+        curl --help all 2>&1 | grep -q -- '--resolve' || die 'curl lacks --resolve support.'
+        curl --help all 2>&1 | grep -q -- '--next' || die 'curl lacks --next support required for connection reuse.'
+        say "curl already installed: $(command -v curl)"
+        return 0
+    fi
+
+    say 'curl is missing. Installing package curl (without apk update)...'
+    if command -v apk >/dev/null 2>&1; then
+        apk add curl || die 'Could not install curl with apk. Check package repository/index and internet access, then rerun the installer.'
+    elif command -v opkg >/dev/null 2>&1; then
+        opkg install curl || die 'Could not install curl with opkg. Check package feeds and internet access, then rerun the installer.'
+    else
+        die 'Neither apk nor opkg was found; cannot install curl automatically.'
+    fi
+
+    command -v curl >/dev/null 2>&1 || die 'curl package installed but executable was not found.'
+    curl --version 2>&1 | grep -qi 'https' || die 'Installed curl has no HTTPS/TLS support.'
+    curl --help all 2>&1 | grep -q -- '--resolve' || die 'Installed curl lacks --resolve support.'
+    curl --help all 2>&1 | grep -q -- '--next' || die 'Installed curl lacks --next support.'
+    say "curl installed and verified: $(command -v curl)"
+}
+
 install_kdig() {
     if [ -x /usr/bin/kdig ]; then
         say 'kdig already installed: /usr/bin/kdig'
@@ -163,7 +188,10 @@ say '===== STEP 5: CHECK / INSTALL TIMEOUT ====='
 install_timeout
 
 say
-say '===== STEP 6: CHECK / INSTALL KDIG ====='
+say '===== STEP 6: CHECK / INSTALL CURL (DoH) ====='
+install_curl
+
+say '===== STEP 7: CHECK / INSTALL KDIG ====='
 install_kdig
 
 if [ -f "$SCRIPT" ] || [ -f "$DASHBOARD" ] || [ -f "$DOH_SCRIPT" ]; then
@@ -175,7 +203,7 @@ if [ -f "$SCRIPT" ] || [ -f "$DASHBOARD" ] || [ -f "$DOH_SCRIPT" ]; then
 fi
 
 say
-say '===== STEP 7: BACK UP / INSTALL FILES ====='
+say '===== STEP 8: BACK UP / INSTALL FILES ====='
 # Stage both files on their destination filesystems, then replace the live files.
 SCRIPT_STAGE="$DIR/.dns-bench.sh.new-$RUN_ID"
 DASH_STAGE="/etc/profile.d/.40-dnstest-dashboard.sh.new-$RUN_ID"
@@ -205,7 +233,7 @@ grep -q 'REPORT="/root/dnstest/latest-top4.txt"' "$DASHBOARD" || die 'Installed 
 [ -x /usr/bin/kdig ] || die 'kdig is not executable at /usr/bin/kdig.'
 
 say
-say '===== STEP 8: PRE-CHECK ====='
+say '===== STEP 9: PRE-CHECK ====='
 if dnstest --check; then
     say 'Pre-check: OK'
 else
@@ -227,6 +255,7 @@ say
 say 'nl installation: verified'
 say 'timeout installation: verified'
 say 'kdig installation: verified'
+say 'curl HTTPS/connection-reuse support: verified'
 say 'Benchmark directory: created and verified'
 say 'DNS benchmark was NOT started.'
 say 'DoH benchmark was NOT started.'

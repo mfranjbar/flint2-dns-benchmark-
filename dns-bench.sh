@@ -82,7 +82,7 @@ fail() {
 }
 
 check_dependencies() {
-    for cmd in kdig timeout awk grep sort head sed date mkdir rmdir rm mv cat; do
+    for cmd in kdig nl timeout awk grep sort head sed date mkdir rmdir rm mv cat; do
         command -v "$cmd" >/dev/null 2>&1 || {
             echo "Missing command: $cmd"
             return 1
@@ -104,9 +104,9 @@ check_dependencies() {
         return 1
     }
 
-    AWK_TEST="$(printf 'test\n' | awk 'NR == 1 { printf "%2d|%s", NR, $0 }')"
-    [ "$AWK_TEST" = ' 1|test' ] || {
-        echo 'awk numbering check failed.'
+    NL_TEST="$(printf 'test\n' | nl -w2 -s'|')"
+    [ "$NL_TEST" = ' 1|test' ] || {
+        echo 'nl numbering check failed.'
         return 1
     }
 
@@ -232,7 +232,7 @@ print_top() {
     '----------------------------------------------------------------------------' "$RESET"
 
     if [ -s "$TOP" ]; then
-        awk '{ printf "%2d|%s\n", NR, $0 }' "$TOP" |
+        nl -w2 -s'|' "$TOP" |
         while IFS='|' read -r RANK AVG NAME IP TYPE OK; do
             [ -n "$RANK" ] || continue
 
@@ -336,7 +336,7 @@ if [ "$1" = --check ]; then
 
     echo 'Pre-check: OK'
     echo 'kdig: OK'
-    echo 'awk numbering: OK'
+    echo 'nl numbering: OK'
     echo 'timeout invocation: OK'
     echo "CA bundle: $CA_FILE"
     echo "Report directory: $DIR"

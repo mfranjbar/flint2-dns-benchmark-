@@ -89,6 +89,11 @@ DOT_COUNT="$(sed -n "/^DOT_SERVERS='/,/^'$/p" "$WORK/dns-bench.sh" | grep -c '|'
 [ "$DNS_COUNT" = 25 ] || die "DNS server count mismatch: $DNS_COUNT (expected 25)."
 [ "$DOT_COUNT" = 13 ] || die "DoT server count mismatch: $DOT_COUNT (expected 13)."
 
+# Verify that the downloaded files belong to this project version.
+grep -q 'mkdir "\$TMP"' "$WORK/dns-bench.sh" || die 'Benchmark is missing temporary-directory creation.'
+grep -q 'REPORT="/root/dnstest/latest-top4.txt"' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard report path does not match the benchmark.'
+grep -q 'DNS benchmark SSH dashboard' "$WORK/40-dnstest-dashboard.sh" || die 'Downloaded SSH dashboard is not the expected dashboard.'
+
 if [ -f "$SCRIPT" ] || [ -f "$DASHBOARD" ]; then
     mkdir -p "$BACKUP" || die 'Could not create backup directory.'
     [ ! -f "$SCRIPT" ] || cp -p "$SCRIPT" "$BACKUP/dns-bench.sh" || die 'Could not back up existing benchmark.'
@@ -98,15 +103,25 @@ fi
 
 say
 say '===== STEP 5: INSTALL FILES ====='
-cp "$WORK/dns-bench.sh" "$SCRIPT" || die 'Could not install benchmark.'
-cp "$WORK/40-dnstest-dashboard.sh" "$DASHBOARD" || die 'Could not install dashboard.'
-chmod 755 "$SCRIPT" || die 'Could not set benchmark permissions.'
-chmod 644 "$DASHBOARD" || die 'Could not set dashboard permissions.'
+# Stage both files on their destination filesystems, then replace the live files.
+SCRIPT_STAGE="$DIR/.dns-bench.sh.new.$"
+DASH_STAGE="/etc/profile.d/.40-dnstest-dashboard.sh.new.$"
+cp "$WORK/dns-bench.sh" "$SCRIPT_STAGE" || die 'Could not stage benchmark.'
+cp "$WORK/40-dnstest-dashboard.sh" "$DASH_STAGE" || die 'Could not stage SSH dashboard.'
+chmod 755 "$SCRIPT_STAGE" || die 'Could not set benchmark permissions.'
+chmod 644 "$DASH_STAGE" || die 'Could not set dashboard permissions.'
+ash -n "$SCRIPT_STAGE" || die 'Staged benchmark syntax check failed.'
+ash -n "$DASH_STAGE" || die 'Staged dashboard syntax check failed.'
+mv -f "$SCRIPT_STAGE" "$SCRIPT" || die 'Could not install benchmark.'
+mv -f "$DASH_STAGE" "$DASHBOARD" || die 'Could not install SSH dashboard.'
 ln -sf "$SCRIPT" /usr/bin/dnstest || die 'Could not create /usr/bin/dnstest symlink.'
 
+[ -x "$SCRIPT" ] || die 'Installed benchmark is not executable.'
+[ -r "$DASHBOARD" ] || die 'Installed SSH dashboard is not readable.'
 [ "$(readlink /usr/bin/dnstest 2>/dev/null)" = "$SCRIPT" ] || die 'Command symlink verification failed.'
 ash -n "$SCRIPT" || die 'Installed benchmark syntax check failed.'
 ash -n "$DASHBOARD" || die 'Installed dashboard syntax check failed.'
+grep -q 'REPORT="/root/dnstest/latest-top4.txt"' "$DASHBOARD" || die 'Installed dashboard report path verification failed.'
 [ -x /usr/bin/kdig ] || die 'kdig is not executable at /usr/bin/kdig.'
 
 say
@@ -124,6 +139,7 @@ say '       INSTALLATION FINISHED'
 say '========================================'
 say "Main script: $SCRIPT"
 say "Dashboard:   $DASHBOARD"
+say 'SSH login dashboard: installed and verified'
 say 'Command:     dnstest'
 [ -d "$BACKUP" ] && say "Backup:      $BACKUP"
 say

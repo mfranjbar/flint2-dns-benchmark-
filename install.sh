@@ -152,7 +152,7 @@ grep -q '\$1 <= 4' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard TOP 4 filte
 grep -q 'No test date found.' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard missing-date handling is missing.'
 grep -Fq '+keepopen' "$WORK/doh-bench.sh" || die 'DoH warm-connection option is missing.'
 grep -Fq '+https=$DOH_PATH' "$WORK/doh-bench.sh" || die 'DoH HTTPS mode is missing.'
-grep -Fq '--doh' "$WORK/dns-bench.sh" || die 'Main command is missing DoH dispatch.'
+grep -Fq -- '--doh' "$WORK/dns-bench.sh" || die 'Main command is missing DoH dispatch.'
 
 say
 say '===== STEP 4: CHECK / INSTALL NL ====='

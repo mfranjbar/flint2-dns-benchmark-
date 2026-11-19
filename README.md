@@ -17,7 +17,15 @@ A sequential DNS benchmark for GL.iNet Flint 2 / OpenWrt.
 Connect to Flint 2 over SSH and run this command as root:
 
 ```sh
-wget -O /tmp/install.sh https://raw.githubusercontent.com/mfranjbar/flint2-dns-benchmark-/main/install.sh && ash /tmp/install.sh
+wget -O /tmp/install.sh https://raw.githubusercontent.com/mfranjbar/flint2-dns-benchmark-/b828f4e77b4ecce9a75028f0a0bb41e6b4d530ee/install.sh &&
+SIZE="$(wc -c < /tmp/install.sh)" &&
+[ "$SIZE" -eq 9661 ] &&
+grep -q 'install_timeout()' /tmp/install.sh &&
+grep -q 'coreutils-timeout' /tmp/install.sh &&
+grep -q 'install_nl()' /tmp/install.sh &&
+grep -q 'install_kdig()' /tmp/install.sh &&
+echo "Installer verified: $SIZE bytes" &&
+ash /tmp/install.sh
 ```
 
 The installer automatically installs **nl** (the `coreutils-nl` package), **timeout** (the `coreutils-timeout` package), and **kdig** (the `knot-dig` package) if either is missing, then downloads the benchmark and SSH dashboard. It checks shell syntax and server counts, creates and verifies `/root/dnstest`, backs up existing project files, and creates the `dnstest` command.

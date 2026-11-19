@@ -20,8 +20,15 @@ case "${1:-}" in
         ;;
 esac
 
+POSTS=0
+GETS=0
+OUTPUTS=0
 while [ "$#" -gt 0 ]; do
     case "$1" in
+        --data-binary)
+            POSTS=$((POSTS + 1))
+            shift 2
+            ;;
         -o)
             out="$2"
             id="${out##*.}"
@@ -33,17 +40,23 @@ while [ "$#" -gt 0 ]; do
                 flags2=128
             fi
             printf "\\$(printf '%03o' "$hi")\\$(printf '%03o' "$lo")\\201\\$(printf '%03o' "$flags2")\\000\\001\\000\\000\\000\\000\\000\\000" > "$out"
+            OUTPUTS=$((OUTPUTS + 1))
             printf '0.001000|200\n'
             shift 2
             ;;
         -w)
             shift 2
             ;;
+        https://*)
+            case "$1" in *'?dns='*) GETS=$((GETS + 1));; esac
+            shift
+            ;;
         *)
             shift
             ;;
     esac
 done
+[ -z "${FAKE_CURL_LOG:-}" ] || echo "$POSTS $GETS $OUTPUTS" >> "$FAKE_CURL_LOG"
 exit 0
 MOCK
 chmod 755 "$TMP/bin/curl"
@@ -52,6 +65,7 @@ export PATH="$TMP/bin:$PATH"
 export DNSTEST_DIR="$TMP/reports"
 export DNSTEST_CURL="$TMP/bin/curl"
 export DNSTEST_CA_FILE="$TMP/ca.pem"
+export FAKE_CURL_LOG="$TMP/curl.log"
 
 busybox ash "$ROOT/doh-bench.sh" --check
 busybox ash "$ROOT/doh-bench.sh"
@@ -63,6 +77,7 @@ test "$(grep -c '22/24' "$REPORT")" -eq 16
 grep -q '5000.0' "$REPORT"
 awk '/^[[:space:]]*[0-9]+[[:space:]]/ { avg=$5+0; if (seen && avg < prev) exit 1; prev=avg; seen=1; count++ } END { if (count != 16) exit 1 }' "$REPORT"
 cp "$REPORT" "$TMP/previous-report.txt"
+: > "$FAKE_CURL_LOG"
 export FAKE_CURL_ALL_FAIL=1
 if busybox ash "$ROOT/doh-bench.sh"; then
     echo 'Expected all-failed DoH test to return nonzero.' >&2

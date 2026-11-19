@@ -140,7 +140,7 @@ if [ -f "$SCRIPT" ] || [ -f "$DASHBOARD" ]; then
 fi
 
 say
-say '===== STEP 5: BACK UP / INSTALL FILES ====='
+say '===== STEP 6: BACK UP / INSTALL FILES ====='
 # Stage both files on their destination filesystems, then replace the live files.
 SCRIPT_STAGE="$DIR/.dns-bench.sh.new-$RUN_ID"
 DASH_STAGE="/etc/profile.d/.40-dnstest-dashboard.sh.new-$RUN_ID"
@@ -163,7 +163,7 @@ grep -q 'REPORT="/root/dnstest/latest-top4.txt"' "$DASHBOARD" || die 'Installed 
 [ -x /usr/bin/kdig ] || die 'kdig is not executable at /usr/bin/kdig.'
 
 say
-say '===== STEP 6: PRE-CHECK ====='
+say '===== STEP 7: PRE-CHECK ====='
 if dnstest --check; then
     say 'Pre-check: OK'
 else

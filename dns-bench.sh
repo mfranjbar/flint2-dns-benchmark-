@@ -72,6 +72,7 @@ REPORT_TMP="$TMP.report"
 cleanup() {
     rm -f "$RAW" "$DOT_RAW" "$TOP" "$REPORT_TMP" \
         "$TMP.servers" "$TMP.dotservers"
+    rmdir "$TMP" 2>/dev/null
     rmdir "$LOCK" 2>/dev/null
 }
 

@@ -19,24 +19,34 @@ VERSION='2.0.0'
 DOMAINS='google.com youtube.com facebook.com instagram.com chatgpt.com x.com whatsapp.com reddit.com wikipedia.org amazon.com tiktok.com pinterest.com'
 
 # Name|IPv4|TLS hostname|DoH path|HTTP method
-# RFC 8484 wire-format DoH over HTTPS; each endpoint's GET/POST mode is explicit.
+# RFC 8484 wire-format DoH over HTTPS GET, matching the reference site's browser fallback.
 DOH_SERVERS='
+AdGuard|94.140.14.14|dns.adguard-dns.com|/dns-query|GET
+AliDNS|223.5.5.5|dns.alidns.com|/dns-query|GET
+OpenDNS|208.67.222.222|doh.opendns.com|/dns-query|GET
+CleanBrowsing|185.228.168.9|doh.cleanbrowsing.org|/doh/family-filter/|GET
 Cloudflare|1.1.1.1|cloudflare-dns.com|/dns-query|GET
+ControlD|76.76.2.0|freedns.controld.com|/p0|GET
+DNS.SB|185.222.222.222|doh.dns.sb|/dns-query|GET
+DNSPod|119.29.29.29|dns.pub|/dns-query|GET
 Google|8.8.8.8|dns.google|/dns-query|GET
-Quad9|9.9.9.9|dns.quad9.net|/dns-query|POST
-AdGuard|94.140.14.14|dns.adguard-dns.com|/dns-query|POST
-DNS-SB|185.222.222.222|doh.dns.sb|/dns-query|GET
-Mullvad|194.242.2.2|dns.mullvad.net|/dns-query|POST
-LibreDNS|116.202.176.26|doh.libredns.gr|/dns-query|POST
-ControlD|76.76.2.0|freedns.controld.com|/p0|POST
-OpenDNS|208.67.222.222|doh.opendns.com|/dns-query|POST
-Digitale-Gesellschaft|185.95.218.42|dns.digitale-gesellschaft.ch|/dns-query|POST
-DNS4EU|86.54.11.100|unfiltered.joindns4.eu|/dns-query|POST
-IIJ|203.180.164.45|public.dns.iij.jp|/dns-query|POST
-UncensoredDNS|91.239.100.100|anycast.uncensoreddns.org|/dns-query|POST
-Switch|130.59.31.248|dns.switch.ch|/dns-query|POST
-OpenBLD|146.112.41.2|ada.openbld.net|/dns-query|POST
-Canadian-Shield|149.112.121.10|private.canadianshield.cira.ca|/dns-query|POST
+NextDNS|45.90.28.0|dns.nextdns.io|/|GET
+OpenBLD|146.112.41.2|ada.openbld.net|/dns-query|GET
+DNS4EU|86.54.11.100|unfiltered.joindns4.eu|/dns-query|GET
+Quad9|9.9.9.9|dns.quad9.net|/dns-query|GET
+360|101.226.4.6|doh.360.cn|/dns-query|GET
+Canadian-Shield|149.112.121.10|private.canadianshield.cira.ca|/dns-query|GET
+Digitale-Gesellschaft|185.95.218.42|dns.digitale-gesellschaft.ch|/dns-query|GET
+DNS-for-Family|94.130.180.225|dns-doh.dnsforfamily.com|/dns-query|GET
+Restena|158.64.1.29|dnspub.restena.lu|/dns-query|GET
+IIJ|203.180.164.45|public.dns.iij.jp|/dns-query|GET
+LibreDNS|116.202.176.26|doh.libredns.gr|/dns-query|GET
+Switch|130.59.31.248|dns.switch.ch|/dns-query|GET
+Applied-Privacy|146.255.56.98|doh.applied-privacy.net|/query|GET
+UncensoredDNS|91.239.100.100|anycast.uncensoreddns.org|/dns-query|GET
+RethinkDNS|104.21.83.62|sky.rethinkdns.com|/dns-query|GET
+Comcast-Xfinity|75.75.75.75|doh.xfinity.com|/dns-query|GET
+Mullvad|194.242.2.2|dns.mullvad.net|/dns-query|GET
 '
 
 TMP="/tmp/flint-doh-$$"

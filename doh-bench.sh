@@ -18,7 +18,7 @@ TIMEOUT_PENALTY=5000
 DOMAINS='google.com youtube.com facebook.com instagram.com chatgpt.com x.com whatsapp.com reddit.com wikipedia.org amazon.com tiktok.com pinterest.com'
 
 # Name|IPv4|TLS hostname|DoH path|HTTP method
-# All endpoints use RFC 8484 wire-format DoH over HTTPS GET.
+# RFC 8484 wire-format DoH over HTTPS; each endpoint's GET/POST mode is explicit.
 DOH_SERVERS='
 Cloudflare|1.1.1.1|cloudflare-dns.com|/dns-query|GET
 Google|8.8.8.8|dns.google|/dns-query|GET
@@ -253,7 +253,11 @@ while IFS='|' read -r NAME IP TLS_HOST DOH_PATH METHOD; do
                 --cacert "$CA_FILE" -H 'accept: application/dns-message' \
                 -o "$RESPONSE_FILE" -w '%{time_total}|%{http_code}\n'
             [ "$HTTP2_ENABLED" -eq 0 ] || set -- "$@" --http2
-            set -- "$@" "$SERVER_URL?dns=$DNS_B64"
+            if [ "$METHOD" = POST ]; then
+                set -- "$@" -H 'content-type: application/dns-message' --data-binary "@$QUERY_FILE" "$SERVER_URL"
+            else
+                set -- "$@" "$SERVER_URL?dns=$DNS_B64"
+            fi
         done
         ROUND=$((ROUND + 1))
     done

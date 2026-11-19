@@ -41,9 +41,10 @@ jobs:
           test "$doh_count" -eq 16
           host_count="$(sed -n "s/^DOMAINS='//p" doh-bench.sh | awk '{print NF}')"
           test "$host_count" -eq 12
-          grep -Fq '+keepopen' doh-bench.sh
-          grep -Fq '+https=$DOH_PATH' doh-bench.sh
-          grep -Fq 'DNSTEST_KDIG' doh-bench.sh
+          grep -Fq -- '--next' doh-bench.sh
+          grep -Fq -- '--resolve' doh-bench.sh
+          grep -Fq 'verify_dns_response' doh-bench.sh
+          grep -Fq 'DNSTEST_CURL' doh-bench.sh
           grep -Fq 'doh-bench.sh' install.sh
           grep -Fq 'doh-bench.sh' uninstall.sh
           grep -Fq -- '--doh' dns-bench.sh

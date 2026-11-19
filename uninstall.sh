@@ -7,6 +7,7 @@ set -u
 
 DIR='/root/dnstest'
 SCRIPT="$DIR/dns-bench.sh"
+DOH_SCRIPT="$DIR/doh-bench.sh"
 COMMAND='/usr/bin/dnstest'
 DASHBOARD='/etc/profile.d/40-dnstest-dashboard.sh'
 
@@ -21,11 +22,12 @@ say '========================================'
 say
 say 'The following project files will be removed only if they match:'
 say " - $SCRIPT"
+say " - $DOH_SCRIPT (only if recognized)"
 say " - $COMMAND (only if it points to $SCRIPT)"
 say " - $DASHBOARD (only if it is this project's dashboard)"
 say
 say 'Preserved:'
-say " - $DIR/latest-top4.txt and all other report/data files"
+say " - $DIR/latest-top4.txt, latest-doh.txt and all other report/data files"
 say ' - /root/backup/dns/ and all backups'
 say " - $DIR itself"
 say ' - kdig / knot-dig and all installed packages'
@@ -48,6 +50,13 @@ if [ -f "$SCRIPT" ] && grep -Fq '# FLINT 2 DNS BENCHMARK' "$SCRIPT"; then
     say "Removed: $SCRIPT"
 else
     say "Kept (missing or not recognized): $SCRIPT"
+fi
+
+if [ -f "$DOH_SCRIPT" ] && grep -Fq "# FLINT 2 DNS OVER HTTPS BENCHMARK" "$DOH_SCRIPT"; then
+    rm -f "$DOH_SCRIPT" || die "Could not remove $DOH_SCRIPT"
+    say "Removed: $DOH_SCRIPT"
+else
+    say "Kept (missing or not recognized): $DOH_SCRIPT"
 fi
 
 if [ -L "$COMMAND" ]; then

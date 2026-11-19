@@ -1,7 +1,7 @@
 #!/bin/ash
 # FLINT 2 DNS BENCHMARK - GITHUB INSTALLER
-# Installs benchmark + SSH login dashboard. No package, DNS,
-# firewall, network or service configuration changes.
+# Installs kdig (if missing), benchmark + SSH login dashboard.
+# Does not change DNS, firewall, network or service configuration.
 
 set -u
 
@@ -19,15 +19,34 @@ WORK="/tmp/flint2-dns-install-$$"
 say() { printf '%s\n' "$*"; }
 die() { say "ERROR: $*"; exit 1; }
 
+install_kdig() {
+    if command -v kdig >/dev/null 2>&1; then
+        say "kdig already installed: $(command -v kdig)"
+        return 0
+    fi
+
+    say 'kdig is missing. Installing package knot-dig...'
+    if command -v apk >/dev/null 2>&1; then
+        apk add knot-dig || die 'Could not install knot-dig with apk. Check package repository/index and internet access, then rerun the installer.'
+    elif command -v opkg >/dev/null 2>&1; then
+        opkg install knot-dig || die 'Could not install knot-dig with opkg. Check package feeds and internet access, then rerun the installer.'
+    else
+        die 'Neither apk nor opkg was found; cannot install kdig automatically.'
+    fi
+
+    command -v kdig >/dev/null 2>&1 || die 'Package installation finished, but kdig command was not found.'
+    say "kdig installed: $(command -v kdig)"
+}
+
 fetch() {
     URL="$1"; OUT="$2"
     if command -v wget >/dev/null 2>&1; then
-        wget -q -O "$OUT" "$URL"
-    elif command -v curl >/dev/null 2>&1; then
-        curl -fsSL "$URL" -o "$OUT"
-    else
-        return 1
+        wget -q -O "$OUT" "$URL" && [ -s "$OUT" ] && return 0
     fi
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL "$URL" -o "$OUT" && [ -s "$OUT" ] && return 0
+    fi
+    return 1
 }
 
 say
@@ -37,21 +56,31 @@ say '========================================'
 say
 
 [ "$(id -u 2>/dev/null)" = 0 ] || die 'Run this installer as root.'
+
+say '===== STEP 1: CHECK / INSTALL KDIG ====='
+install_kdig
+
+say
+say '===== STEP 2: PREPARE DIRECTORIES ====='
 mkdir -p "$DIR" "$BACKUP_ROOT" /etc/profile.d "$WORK" || die 'Could not create required directories.'
+[ -d "$DIR" ] && [ -w "$DIR" ] || die "Benchmark directory is not writable: $DIR"
+say "Benchmark directory ready: $DIR"
 
 cleanup() { rm -rf "$WORK"; }
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-say 'Downloading project files...'
+say
+say '===== STEP 3: DOWNLOAD PROJECT FILES ====='
 fetch "$RAW_BASE/dns-bench.sh" "$WORK/dns-bench.sh" || die 'Could not download dns-bench.sh.'
 fetch "$RAW_BASE/40-dnstest-dashboard.sh" "$WORK/40-dnstest-dashboard.sh" || die 'Could not download dashboard.'
 
 [ -s "$WORK/dns-bench.sh" ] || die 'Downloaded benchmark is empty.'
 [ -s "$WORK/40-dnstest-dashboard.sh" ] || die 'Downloaded dashboard is empty.'
 
-say 'Checking shell syntax...'
+say
+say '===== STEP 4: CHECK SHELL SYNTAX / SERVER COUNTS ====='
 ash -n "$WORK/dns-bench.sh" || die 'Benchmark shell syntax check failed.'
 ash -n "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard shell syntax check failed.'
 
@@ -67,6 +96,8 @@ if [ -f "$SCRIPT" ] || [ -f "$DASHBOARD" ]; then
     say "Previous files backed up to: $BACKUP"
 fi
 
+say
+say '===== STEP 5: INSTALL FILES ====='
 cp "$WORK/dns-bench.sh" "$SCRIPT" || die 'Could not install benchmark.'
 cp "$WORK/40-dnstest-dashboard.sh" "$DASHBOARD" || die 'Could not install dashboard.'
 chmod 755 "$SCRIPT" || die 'Could not set benchmark permissions.'
@@ -76,17 +107,14 @@ ln -sf "$SCRIPT" /usr/bin/dnstest || die 'Could not create /usr/bin/dnstest syml
 [ "$(readlink /usr/bin/dnstest 2>/dev/null)" = "$SCRIPT" ] || die 'Command symlink verification failed.'
 ash -n "$SCRIPT" || die 'Installed benchmark syntax check failed.'
 ash -n "$DASHBOARD" || die 'Installed dashboard syntax check failed.'
+[ -x /usr/bin/kdig ] || die 'kdig is not executable at /usr/bin/kdig.'
 
 say
-say '===== SERVER COUNTS ====='
-say "DNS servers: $DNS_COUNT"
-say "DoT servers: $DOT_COUNT"
-say
-say '===== PRE-CHECK ====='
+say '===== STEP 6: PRE-CHECK ====='
 if dnstest --check; then
     say 'Pre-check: OK'
 else
-    say 'WARNING: Files installed, but dependency pre-check failed.'
+    say 'WARNING: Files installed, but another dependency or CA bundle check failed.'
     say 'Review the missing dependency or CA bundle message above.'
 fi
 
@@ -99,7 +127,9 @@ say "Dashboard:   $DASHBOARD"
 say 'Command:     dnstest'
 [ -d "$BACKUP" ] && say "Backup:      $BACKUP"
 say
+say 'kdig installation: verified'
+say 'Benchmark directory: created and verified'
 say 'DNS benchmark was NOT started.'
-say 'No package, DNS, firewall, network or service settings were changed.'
+say 'No DNS, firewall, network or service settings were changed.'
 say 'Run dnstest when you want to start a benchmark.'
 say '========================================'

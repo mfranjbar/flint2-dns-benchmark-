@@ -50,7 +50,7 @@ Mullvad|194.242.2.2|dns.mullvad.net|/dns-query|GET
 '
 DOH_SERVERS="${DNSTEST_DOH_SERVERS:-$DEFAULT_DOH_SERVERS}"
 
-TMP="/tmp/flint-doh-$"
+TMP="/tmp/flint-doh-$$"
 RAW="$TMP.raw"
 METRICS="$TMP.metrics"
 ERRORS="$TMP.errors"

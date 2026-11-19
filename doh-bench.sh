@@ -3,10 +3,10 @@
 # Independent implementation of the warm-up + DoH latency methodology.
 # No DNS, firewall, network, or service configuration changes.
 
-DIR='/root/dnstest'
+DIR="${DNSTEST_DIR:-/root/dnstest}"
 REPORT="$DIR/latest-doh.txt"
-KDIG='/usr/bin/kdig'
-CA_FILE='/etc/ssl/cert.pem'
+KDIG="${DNSTEST_KDIG:-/usr/bin/kdig}"
+CA_FILE="${DNSTEST_CA_FILE:-/etc/ssl/cert.pem}"
 [ -s "$CA_FILE" ] || CA_FILE='/etc/ssl/certs/ca-certificates.crt'
 ROUNDS=2
 WARMUP_ROUNDS=1

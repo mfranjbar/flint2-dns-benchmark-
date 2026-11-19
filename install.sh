@@ -11,6 +11,7 @@ RAW_BASE="https://raw.githubusercontent.com/$REPO/$BRANCH"
 DIR='/root/dnstest'
 SCRIPT="$DIR/dns-bench.sh"
 DASHBOARD='/etc/profile.d/40-dnstest-dashboard.sh'
+DOH_SCRIPT="$DIR/doh-bench.sh"
 BACKUP_ROOT='/root/backup/dns'
 STAMP="$(date '+%Y%m%d-%H%M%S')"
 WORK_BASE='/tmp/flint2-dns-install'
@@ -103,7 +104,7 @@ RUN_ID="${WORK##*.}"
 BACKUP="$BACKUP_ROOT/flint2-$STAMP-$RUN_ID"
 
 cleanup() {
-    rm -f "$DIR/.dns-bench.sh.new-$RUN_ID" "/etc/profile.d/.40-dnstest-dashboard.sh.new-$RUN_ID"
+    rm -f "$DIR/.dns-bench.sh.new-$RUN_ID" "$DIR/.doh-bench.sh.new-$RUN_ID" "/etc/profile.d/.40-dnstest-dashboard.sh.new-$RUN_ID"
     rm -rf "$WORK"
 }
 trap cleanup EXIT
@@ -119,14 +120,17 @@ say
 say '===== STEP 2: DOWNLOAD PROJECT FILES ====='
 fetch "$RAW_BASE/dns-bench.sh" "$WORK/dns-bench.sh" || die 'Could not download dns-bench.sh.'
 fetch "$RAW_BASE/40-dnstest-dashboard.sh" "$WORK/40-dnstest-dashboard.sh" || die 'Could not download dashboard.'
+fetch "$RAW_BASE/doh-bench.sh" "$WORK/doh-bench.sh" || die 'Could not download DoH benchmark.'
 
 [ -s "$WORK/dns-bench.sh" ] || die 'Downloaded benchmark is empty.'
 [ -s "$WORK/40-dnstest-dashboard.sh" ] || die 'Downloaded dashboard is empty.'
+[ -s "$WORK/doh-bench.sh" ] || die 'Downloaded DoH benchmark is empty.'
 
 say
 say '===== STEP 3: CHECK SHELL SYNTAX / SERVER COUNTS ====='
 ash -n "$WORK/dns-bench.sh" || die 'Benchmark shell syntax check failed.'
 ash -n "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard shell syntax check failed.'
+ash -n "$WORK/doh-bench.sh" || die 'DoH benchmark shell syntax check failed.'
 
 DNS_COUNT="$(sed -n "/^DNS_SERVERS='/,/^'$/p" "$WORK/dns-bench.sh" | grep -c '|')"
 DOT_COUNT="$(sed -n "/^DOT_SERVERS='/,/^'$/p" "$WORK/dns-bench.sh" | grep -c '|')"
@@ -157,10 +161,11 @@ say
 say '===== STEP 6: CHECK / INSTALL KDIG ====='
 install_kdig
 
-if [ -f "$SCRIPT" ] || [ -f "$DASHBOARD" ]; then
+if [ -f "$SCRIPT" ] || [ -f "$DASHBOARD" ] || [ -f "$DOH_SCRIPT" ]; then
     mkdir -p "$BACKUP" || die 'Could not create backup directory.'
     [ ! -f "$SCRIPT" ] || cp -p "$SCRIPT" "$BACKUP/dns-bench.sh" || die 'Could not back up existing benchmark.'
     [ ! -f "$DASHBOARD" ] || cp -p "$DASHBOARD" "$BACKUP/40-dnstest-dashboard.sh" || die 'Could not back up existing dashboard.'
+    [ ! -f "$DOH_SCRIPT" ] || cp -p "$DOH_SCRIPT" "$BACKUP/doh-bench.sh" || die 'Could not back up existing DoH benchmark.'
     say "Previous files backed up to: $BACKUP"
 fi
 
@@ -169,21 +174,28 @@ say '===== STEP 7: BACK UP / INSTALL FILES ====='
 # Stage both files on their destination filesystems, then replace the live files.
 SCRIPT_STAGE="$DIR/.dns-bench.sh.new-$RUN_ID"
 DASH_STAGE="/etc/profile.d/.40-dnstest-dashboard.sh.new-$RUN_ID"
+DOH_STAGE="$DIR/.doh-bench.sh.new-$RUN_ID"
 cp "$WORK/dns-bench.sh" "$SCRIPT_STAGE" || die 'Could not stage benchmark.'
 cp "$WORK/40-dnstest-dashboard.sh" "$DASH_STAGE" || die 'Could not stage SSH dashboard.'
+cp "$WORK/doh-bench.sh" "$DOH_STAGE" || die 'Could not stage DoH benchmark.'
 chmod 755 "$SCRIPT_STAGE" || die 'Could not set benchmark permissions.'
 chmod 644 "$DASH_STAGE" || die 'Could not set dashboard permissions.'
+chmod 755 "$DOH_STAGE" || die 'Could not set DoH benchmark permissions.'
 ash -n "$SCRIPT_STAGE" || die 'Staged benchmark syntax check failed.'
 ash -n "$DASH_STAGE" || die 'Staged dashboard syntax check failed.'
+ash -n "$DOH_STAGE" || die 'Staged DoH benchmark syntax check failed.'
 mv -f "$SCRIPT_STAGE" "$SCRIPT" || die 'Could not install benchmark.'
 mv -f "$DASH_STAGE" "$DASHBOARD" || die 'Could not install SSH dashboard.'
+mv -f "$DOH_STAGE" "$DOH_SCRIPT" || die 'Could not install DoH benchmark.'
 ln -sf "$SCRIPT" /usr/bin/dnstest || die 'Could not create /usr/bin/dnstest symlink.'
 
 [ -x "$SCRIPT" ] || die 'Installed benchmark is not executable.'
 [ -r "$DASHBOARD" ] || die 'Installed SSH dashboard is not readable.'
+[ -x "$DOH_SCRIPT" ] || die 'Installed DoH benchmark is not executable.'
 [ "$(readlink /usr/bin/dnstest 2>/dev/null)" = "$SCRIPT" ] || die 'Command symlink verification failed.'
 ash -n "$SCRIPT" || die 'Installed benchmark syntax check failed.'
 ash -n "$DASHBOARD" || die 'Installed dashboard syntax check failed.'
+ash -n "$DOH_SCRIPT" || die 'Installed DoH benchmark syntax check failed.'
 grep -q 'REPORT="/root/dnstest/latest-top4.txt"' "$DASHBOARD" || die 'Installed dashboard report path verification failed.'
 [ -x /usr/bin/kdig ] || die 'kdig is not executable at /usr/bin/kdig.'
 
@@ -202,6 +214,7 @@ say '       INSTALLATION FINISHED'
 say '========================================'
 say "Main script: $SCRIPT"
 say "Dashboard:   $DASHBOARD"
+say "DoH script:  $DOH_SCRIPT"
 say 'SSH login dashboard: installed and verified'
 say 'Command:     dnstest'
 [ -d "$BACKUP" ] && say "Backup:      $BACKUP"
@@ -211,6 +224,7 @@ say 'timeout installation: verified'
 say 'kdig installation: verified'
 say 'Benchmark directory: created and verified'
 say 'DNS benchmark was NOT started.'
+say 'DoH benchmark was NOT started.'
 say 'No DNS, firewall, network or service settings were changed.'
 say 'Run dnstest when you want to start a benchmark.'
 say '========================================'

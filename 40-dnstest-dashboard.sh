@@ -9,7 +9,7 @@ case "$-" in *i*) ;; *) return 0 2>/dev/null || exit 0 ;; esac
 
 printf '\n'
 printf '  ================================================\n'
-printf '       DNS BENCHMARK / FLINT 2\n'
+printf '       DNS BENCHMARK / FLINT 2 v2.0.0\n'
 printf '       TOP 4 DNS + BEST DoT\n'
 printf '  ================================================\n'
 printf '\n'

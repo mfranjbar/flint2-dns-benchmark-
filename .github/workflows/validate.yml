@@ -38,6 +38,12 @@ jobs:
           grep -Fq 'case "$-" in *i*)' 40-dnstest-dashboard.sh
           grep -Fq '[ -n "${SSH_CONNECTION:-}" ]' 40-dnstest-dashboard.sh
           grep -q '\$1 <= 4' 40-dnstest-dashboard.sh
+          grep -q 'for cmd in .*nl' dns-bench.sh
+          grep -q "nl -w2 -s'|' \"\$TOP\"" dns-bench.sh
+          grep -q 'install_nl()' install.sh
+          grep -q 'apk add coreutils-nl' install.sh
+          grep -q 'opkg install coreutils-nl' install.sh
+          ! grep -q 'apk update' install.sh
           grep -q 'mkdir "\$TMP" || fail' dns-bench.sh
           grep -q 'rmdir "\$TMP"' dns-bench.sh
           grep -Fq 'Type YES to uninstall:' uninstall.sh

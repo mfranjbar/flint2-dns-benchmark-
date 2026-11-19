@@ -38,7 +38,7 @@ jobs:
           test "$dns_count" -eq 25
           test "$dot_count" -eq 13
           doh_count="$(sed -n "/^DOH_SERVERS='/,/^'$/p" doh-bench.sh | grep -c '|')"
-          test "$doh_count" -eq 16
+          test "$doh_count" -eq 26
           host_count="$(sed -n "s/^DOMAINS='//p" doh-bench.sh | awk '{print NF}')"
           test "$host_count" -eq 12
           grep -Fq -- '--next' doh-bench.sh

@@ -99,7 +99,9 @@ grep -q 'REPORT="$DIR/latest-top4.txt"' "$WORK/dns-bench.sh" || die 'Benchmark r
 grep -q 'REPORT="/root/dnstest/latest-top4.txt"' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard report path does not match the benchmark.'
 grep -q 'DNS benchmark SSH dashboard' "$WORK/40-dnstest-dashboard.sh" || die 'Downloaded SSH dashboard is not the expected dashboard.'
 grep -q 'TOP 4 DNS + BEST DoT' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard title is missing.'
-grep -q 'DNS OVER TLS DOWN' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard DoT fallback row is missing.'
+grep -Fq 'case "$-" in *i*)' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard interactive-shell guard is missing.'
+grep -Fq '[ -n "${SSH_CONNECTION:-}" ]' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard SSH-only guard is missing.'
+grep -q '\$1 <= 4' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard TOP 4 filter is missing.'
 grep -q 'No test date found.' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard missing-date handling is missing.'
 
 say

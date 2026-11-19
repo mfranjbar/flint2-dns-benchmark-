@@ -73,10 +73,10 @@ busybox ash "$ROOT/doh-bench.sh"
 REPORT="$TMP/reports/latest-doh.txt"
 test -s "$REPORT"
 grep -q 'DNS OVER HTTPS BENCHMARK / FLINT 2' "$REPORT"
-test "$(grep -c '22/24' "$REPORT")" -eq 16
+test "$(grep -c '22/24' "$REPORT")" -eq 26
 grep -q '5000.0' "$REPORT"
-awk '/^[[:space:]]*[0-9]+[[:space:]]/ { avg=$5+0; if (seen && avg < prev) exit 1; prev=avg; seen=1; count++ } END { if (count != 16) exit 1 }' "$REPORT"
-awk '{ p+=$1; g+=$2; o+=$3; n++ } END { if (n != 16 || p != 468 || g != 108 || o != 576) exit 1 }' "$FAKE_CURL_LOG"
+awk '/^[[:space:]]*[0-9]+[[:space:]]/ { avg=$5+0; if (seen && avg < prev) exit 1; prev=avg; seen=1; count++ } END { if (count != 26) exit 1 }' "$REPORT"
+awk '{ p+=$1; g+=$2; o+=$3; n++ } END { if (n != 26 || p != 0 || g != 936 || o != 936) exit 1 }' "$FAKE_CURL_LOG"
 cp "$REPORT" "$TMP/previous-report.txt"
 : > "$FAKE_CURL_LOG"
 export FAKE_CURL_ALL_FAIL=1

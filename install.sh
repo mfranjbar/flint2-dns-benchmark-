@@ -13,12 +13,14 @@ SCRIPT="$DIR/dns-bench.sh"
 DASHBOARD='/etc/profile.d/40-dnstest-dashboard.sh'
 BACKUP_ROOT='/root/backup/dns'
 STAMP="$(date '+%Y%m%d-%H%M%S')"
-RUN_ID="$STAMP-$"
-BACKUP="$BACKUP_ROOT/flint2-$RUN_ID"
-WORK="/tmp/flint2-dns-install-$RUN_ID"
+WORK_BASE='/tmp/flint2-dns-install'
 
 say() { printf '%s\n' "$*"; }
 die() { say "ERROR: $*"; exit 1; }
+
+WORK="$(mktemp -d "$WORK_BASE.XXXXXX")" || die 'Could not create unique work directory.'
+RUN_ID="${WORK##*.}"
+BACKUP="$BACKUP_ROOT/flint2-$STAMP-$RUN_ID"
 
 install_kdig() {
     if command -v kdig >/dev/null 2>&1; then

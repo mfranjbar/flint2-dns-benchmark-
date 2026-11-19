@@ -66,6 +66,7 @@ install_curl() {
         curl --version 2>&1 | grep -qi 'https' || die 'curl exists but has no HTTPS/TLS support.'
         curl --help all 2>&1 | grep -q -- '--resolve' || die 'curl lacks --resolve support.'
         curl --help all 2>&1 | grep -q -- '--next' || die 'curl lacks --next support required for connection reuse.'
+        curl --help all 2>&1 | grep -q -- '--write-out' || die 'curl lacks --write-out timing support.'
         say "curl already installed: $(command -v curl)"
         return 0
     fi
@@ -83,6 +84,7 @@ install_curl() {
     curl --version 2>&1 | grep -qi 'https' || die 'Installed curl has no HTTPS/TLS support.'
     curl --help all 2>&1 | grep -q -- '--resolve' || die 'Installed curl lacks --resolve support.'
     curl --help all 2>&1 | grep -q -- '--next' || die 'Installed curl lacks --next support.'
+    curl --help all 2>&1 | grep -q -- '--write-out' || die 'Installed curl lacks --write-out timing support.'
     say "curl installed and verified: $(command -v curl)"
 }
 
@@ -236,10 +238,15 @@ grep -q 'REPORT="/root/dnstest/latest-top4.txt"' "$DASHBOARD" || die 'Installed 
 say
 say '===== STEP 9: PRE-CHECK ====='
 if dnstest --check; then
-    say 'Pre-check: OK'
+    say 'Classic DNS pre-check: OK'
 else
-    say 'WARNING: Files installed, but another dependency or CA bundle check failed.'
-    say 'Review the missing dependency or CA bundle message above.'
+    say 'WARNING: Classic DNS pre-check failed; review the dependency or CA bundle message above.'
+fi
+
+if dnstest --doh --check; then
+    say 'DoH pre-check: OK'
+else
+    say 'WARNING: DoH pre-check failed; review the curl, CA bundle or utility message above.'
 fi
 
 say

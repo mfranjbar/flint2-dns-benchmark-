@@ -14,13 +14,13 @@ A sequential DNS benchmark for GL.iNet Flint 2 / OpenWrt.
 
 ## Install on Flint 2
 
-Run as root:
+Connect to Flint 2 over SSH and run this command as root:
 
 ```sh
 wget -O /tmp/install.sh https://raw.githubusercontent.com/mfranjbar/flint2-dns-benchmark-/main/install.sh && ash /tmp/install.sh
 ```
 
-The installer downloads the benchmark and dashboard, checks shell syntax and server counts, backs up existing files, and creates the `dnstest` command.
+This single command downloads the installer to `/tmp/install.sh` and runs it with the OpenWrt shell (`ash`). The installer downloads the benchmark and SSH dashboard, checks shell syntax and server counts, backs up existing files, and creates the `dnstest` command.
 
 It does **not** install packages, start a benchmark, or change DNS, firewall, network, or service settings.
 

@@ -20,6 +20,25 @@ die() { say "ERROR: $*"; exit 1; }
 
 
 
+install_nl() {
+    if command -v nl >/dev/null 2>&1; then
+        say "nl already installed: $(command -v nl)"
+        return 0
+    fi
+
+    say 'nl is missing. Installing package coreutils-nl...'
+    if command -v apk >/dev/null 2>&1; then
+        apk add coreutils-nl || die 'Could not install coreutils-nl with apk. Check package repository/index and internet access, then rerun the installer.'
+    elif command -v opkg >/dev/null 2>&1; then
+        opkg install coreutils-nl || die 'Could not install coreutils-nl with opkg. Check package feeds and internet access, then rerun the installer.'
+    else
+        die 'Neither apk nor opkg was found; cannot install nl automatically.'
+    fi
+
+    command -v nl >/dev/null 2>&1 || die 'Package installation finished, but nl was not found.'
+    say "nl installed: $(command -v nl)"
+}
+
 install_kdig() {
     if [ -x /usr/bin/kdig ]; then
         say 'kdig already installed: /usr/bin/kdig'
@@ -98,6 +117,7 @@ grep -q 'mkdir "\$TMP"' "$WORK/dns-bench.sh" || die 'Benchmark is missing tempor
 grep -q 'REPORT="$DIR/latest-top4.txt"' "$WORK/dns-bench.sh" || die 'Benchmark report path is not the expected path.'
 grep -q 'REPORT="/root/dnstest/latest-top4.txt"' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard report path does not match the benchmark.'
 grep -q 'DNS benchmark SSH dashboard' "$WORK/40-dnstest-dashboard.sh" || die 'Downloaded SSH dashboard is not the expected dashboard.'
+grep -q 'for cmd in .*nl' "$WORK/dns-bench.sh" || die 'Benchmark is missing the nl dependency check.'
 grep -q 'TOP 4 DNS + BEST DoT' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard title is missing.'
 grep -Fq 'case "$-" in *i*)' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard interactive-shell guard is missing.'
 grep -Fq '[ -n "${SSH_CONNECTION:-}" ]' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard SSH-only guard is missing.'
@@ -105,7 +125,11 @@ grep -q '\$1 <= 4' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard TOP 4 filte
 grep -q 'No test date found.' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard missing-date handling is missing.'
 
 say
-say '===== STEP 4: CHECK / INSTALL KDIG ====='
+say '===== STEP 4: CHECK / INSTALL NL ====='
+install_nl
+
+say
+say '===== STEP 5: CHECK / INSTALL KDIG ====='
 install_kdig
 
 if [ -f "$SCRIPT" ] || [ -f "$DASHBOARD" ]; then
@@ -157,6 +181,7 @@ say 'SSH login dashboard: installed and verified'
 say 'Command:     dnstest'
 [ -d "$BACKUP" ] && say "Backup:      $BACKUP"
 say
+say 'nl installation: verified'
 say 'kdig installation: verified'
 say 'Benchmark directory: created and verified'
 say 'DNS benchmark was NOT started.'

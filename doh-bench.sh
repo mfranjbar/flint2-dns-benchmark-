@@ -10,17 +10,17 @@ CURL="${DNSTEST_CURL:-curl}"
 CA_FILE="${DNSTEST_CA_FILE:-/etc/ssl/cert.pem}"
 [ -s "$CA_FILE" ] || CA_FILE='/etc/ssl/certs/ca-certificates.crt'
 
-ROUNDS=2
-WARMUP_ROUNDS=1
-QUERY_TIMEOUT=5
-SERVER_LIMIT=25
+ROUNDS="${DNSTEST_ROUNDS:-2}"
+WARMUP_ROUNDS="${DNSTEST_WARMUP_ROUNDS:-1}"
+QUERY_TIMEOUT="${DNSTEST_QUERY_TIMEOUT:-5}"
+SERVER_LIMIT="${DNSTEST_SERVER_LIMIT:-25}"
 TIMEOUT_PENALTY=5000
 VERSION='2.0.0'
-DOMAINS='google.com youtube.com facebook.com instagram.com chatgpt.com x.com whatsapp.com reddit.com wikipedia.org amazon.com tiktok.com pinterest.com'
+DOMAINS="${DNSTEST_DOMAINS:-google.com youtube.com facebook.com instagram.com chatgpt.com x.com whatsapp.com reddit.com wikipedia.org amazon.com tiktok.com pinterest.com}"
 
 # Name|IPv4|TLS hostname|DoH path|HTTP method
 # RFC 8484 wire-format DoH over HTTPS GET, matching the reference site's browser fallback.
-DOH_SERVERS='
+DEFAULT_DOH_SERVERS='
 AdGuard|94.140.14.14|dns.adguard-dns.com|/dns-query|GET
 AliDNS|223.5.5.5|dns.alidns.com|/dns-query|GET
 OpenDNS|208.67.222.222|doh.opendns.com|/dns-query|GET
@@ -48,13 +48,14 @@ RethinkDNS|104.21.83.62|sky.rethinkdns.com|/dns-query|GET
 Comcast-Xfinity|75.75.75.75|doh.xfinity.com|/dns-query|GET
 Mullvad|194.242.2.2|dns.mullvad.net|/dns-query|GET
 '
+DOH_SERVERS="${DNSTEST_DOH_SERVERS:-$DEFAULT_DOH_SERVERS}"
 
-TMP="/tmp/flint-doh-$$"
+TMP="/tmp/flint-doh-$"
 RAW="$TMP.raw"
 METRICS="$TMP.metrics"
 ERRORS="$TMP.errors"
 LOCK='/tmp/flint-doh-benchmark.lock'
-TOTAL_DOMAINS=12
+TOTAL_DOMAINS="$(printf '%s\n' "$DOMAINS" | awk '{print NF}')"
 TOTAL_SAMPLES=$((TOTAL_DOMAINS * ROUNDS))
 WARMUP_COUNT=$((TOTAL_DOMAINS * WARMUP_ROUNDS))
 HTTP2_ENABLED=0

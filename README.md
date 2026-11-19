@@ -34,7 +34,7 @@ To remove only the benchmark script, its command symlink, and the SSH dashboard,
 wget -O /tmp/uninstall.sh https://raw.githubusercontent.com/mfranjbar/flint2-dns-benchmark-/main/uninstall.sh && ash /tmp/uninstall.sh
 ```
 
-The uninstaller requires typing `YES` for confirmation. It preserves `/root/dnstest/`, benchmark reports, `/root/backup/dns/`, and installed packages (including `knot-dig`). It does not change DNS, firewall, network, or service settings.
+The uninstaller requires typing `YES` for confirmation. It preserves `/root/dnstest/`, benchmark reports, `/root/backup/dns/`, and installed packages (including `knot-dig` and `coreutils-nl`). It does not change DNS, firewall, network, or service settings.
 
 ## Usage
 

@@ -146,7 +146,8 @@ verify_dns_response() {
     VR_LO=$((VR_ID % 256))
     [ "$1" -eq "$VR_HI" ] && [ "$2" -eq "$VR_LO" ] || return 1
     [ $(( $3 & 128 )) -ne 0 ] || return 1
-    [ $(( $4 & 15 )) -eq 0 ] || return 1
+    VR_RCODE=$(( $4 & 15 ))
+    [ "$VR_RCODE" -eq 0 ] || [ "$VR_RCODE" -eq 3 ] || return 1
     return 0
 }
 
@@ -335,7 +336,7 @@ EOF2
         "$OK/$TOTAL_SAMPLES" "$IP" "$NAME" >> "$RAW"
 done < "$TMP.servers"
 
-[ "$TOTAL_OK" -gt 0 ] || fail 'No DoH provider returned a verified NOERROR answer; previous report preserved.'
+[ "$TOTAL_OK" -gt 0 ] || fail 'No DoH provider returned a valid DNS response; previous report preserved.'
 LAST_TEST="$(date '+%Y-%m-%d %H:%M:%S')"
 print_report > "$TMP.report" || fail 'Could not create DoH report.'
 [ -s "$TMP.report" ] || fail 'DoH report is empty.'

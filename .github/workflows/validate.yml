@@ -41,6 +41,10 @@ jobs:
           grep -q 'for cmd in .*nl' dns-bench.sh
           grep -q "nl -w2 -s'|' \"\$TOP\"" dns-bench.sh
           grep -q 'install_nl()' install.sh
+          grep -q 'install_timeout()' install.sh
+          grep -q 'apk add coreutils-timeout' install.sh
+          grep -q 'opkg install coreutils-timeout' install.sh
+          grep -q 'timeout 1 sh -c' install.sh
           grep -q 'apk add coreutils-nl' install.sh
           grep -q 'opkg install coreutils-nl' install.sh
           ! grep -q 'apk update' install.sh

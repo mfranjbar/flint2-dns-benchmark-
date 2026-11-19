@@ -175,8 +175,9 @@ grep -Fq 'case "$-" in *i*)' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard i
 grep -Fq '[ -n "${SSH_CONNECTION:-}" ]' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard SSH-only guard is missing.'
 grep -q '\$1 <= 4' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard TOP 4 filter is missing.'
 grep -q 'No test date found.' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard missing-date handling is missing.'
-grep -Fq '+keepopen' "$WORK/doh-bench.sh" || die 'DoH warm-connection option is missing.'
-grep -Fq '+https=$DOH_PATH' "$WORK/doh-bench.sh" || die 'DoH HTTPS mode is missing.'
+grep -Fq -- '--next' "$WORK/doh-bench.sh" || die 'DoH connection reuse option is missing.'
+grep -Fq -- '--resolve' "$WORK/doh-bench.sh" || die 'DoH direct endpoint resolution is missing.'
+grep -Fq 'verify_dns_response' "$WORK/doh-bench.sh" || die 'DoH response verification is missing.'
 grep -Fq -- '--doh' "$WORK/dns-bench.sh" || die 'Main command is missing DoH dispatch.'
 
 say

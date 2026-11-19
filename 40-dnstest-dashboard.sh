@@ -6,13 +6,6 @@ REPORT="/root/dnstest/latest-top4.txt"
 case "$-" in *i*) ;; *) return 0 2>/dev/null || exit 0 ;; esac
 [ -n "${SSH_CONNECTION:-}" ] || return 0 2>/dev/null || exit 0
 
-DOH_REPORT="/root/dnstest/latest-doh.txt"
-if [ -r "$DOH_REPORT" ]; then
-    printf '  DNS OVER HTTPS / TOP RESULTS\n'
-    printf '  ---------------------------------------------------------------\n'
-    sed -n '1,12p' "$DOH_REPORT" | sed 's/^/  /'
-    printf '\n'
-fi
 
 printf '\n'
 printf '  ================================================\n'
@@ -55,3 +48,12 @@ END {
 ' "$REPORT"
 
 printf '\n'
+DOH_REPORT="/root/dnstest/latest-doh.txt"
+if [ -r "$DOH_REPORT" ]; then
+    printf '  DNS OVER HTTPS / TOP RESULTS\n'
+    printf '  ---------------------------------------------------------------\n'
+    sed -n '1,12p' "$DOH_REPORT" | sed 's/^/  /'
+    printf '\n'
+fi
+
+printf '\\n'

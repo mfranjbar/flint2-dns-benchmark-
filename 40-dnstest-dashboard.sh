@@ -20,15 +20,15 @@ fi
 
 awk '
 BEGIN {
-    printf "  %-1s  %-30s %-8s %-15s %-4s %-5s\\n", \\
+    printf "  %-1s  %-30s %-8s %-15s %-4s %-5s\n", \
            "#", "DNS", "AVG", "IP", "TYPE", "OK"
-    printf "  ---------------------------------------------------------------\\n"
+    printf "  ---------------------------------------------------------------\n"
 }
 {
     if ($0 ~ /^[[:space:]]*[1-5][[:space:]]/ && $1 ~ /^[1-5]$/) {
         # Show TOP 4 and the best successful DoT row; hide the failure placeholder.
         if (($1 <= 4 || ($1 == 5 && $2 != "DNS")) && NF >= 6) {
-            printf "  %-1s  %-30.30s %-8.8s %-15.15s %-4.4s %-5.5s\\n", \\
+            printf "  %-1s  %-30.30s %-8.8s %-15.15s %-4.4s %-5.5s\n", \
                    $1, $2, $6, $3, $4, $5
         }
     }
@@ -38,12 +38,12 @@ BEGIN {
     }
 }
 END {
-    printf "  ---------------------------------------------------------------\\n"
+    printf "  ---------------------------------------------------------------\n"
     if (last_test != "")
-        printf "\\n  %s\\n", last_test
+        printf "\n  %s\n", last_test
     else
-        printf "\\n  No test date found.\\n"
+        printf "\n  No test date found.\n"
 }
-'' "$REPORT"
+' "$REPORT"
 
 printf '\n'

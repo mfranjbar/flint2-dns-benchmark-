@@ -256,7 +256,7 @@ while IFS='|' read -r NAME IP TLS_HOST DOH_PATH METHOD; do
             DNS_B64="$(base64 < "$QUERY_FILE" | tr -d '\n' | tr '+/' '-_' | tr -d '=')"
             [ "$IDX" -eq 1 ] || set -- "$@" --next
             set -- "$@" --silent --show-error --connect-timeout "$QUERY_TIMEOUT" \
-                --max-time "$QUERY_TIMEOUT" --resolve "$TLS_HOST:443:$IP" \
+                --max-time "$QUERY_TIMEOUT" --noproxy '*' --resolve "$TLS_HOST:443:$IP" \
                 --cacert "$CA_FILE" -H 'accept: application/dns-message' \
                 -o "$RESPONSE_FILE" -w '%{time_total}|%{http_code}\n'
             [ "$HTTP2_ENABLED" -eq 0 ] || set -- "$@" --http2
@@ -278,7 +278,7 @@ while IFS='|' read -r NAME IP TLS_HOST DOH_PATH METHOD; do
             build_dns_query "$QUERY_FILE" "$DOMAIN" "$IDX" || fail "Could not build DNS query for $DOMAIN"
             DNS_B64="$(base64 < "$QUERY_FILE" | tr -d '\n' | tr '+/' '-_' | tr -d '=')"
             set -- "$@" --next --silent --show-error --connect-timeout "$QUERY_TIMEOUT" \
-                --max-time "$QUERY_TIMEOUT" --resolve "$TLS_HOST:443:$IP" \
+                --max-time "$QUERY_TIMEOUT" --noproxy '*' --resolve "$TLS_HOST:443:$IP" \
                 --cacert "$CA_FILE" -H 'accept: application/dns-message' \
                 -o "$RESPONSE_FILE" -w '%{time_total}|%{http_code}\n'
             [ "$HTTP2_ENABLED" -eq 0 ] || set -- "$@" --http2

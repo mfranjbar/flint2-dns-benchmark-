@@ -16,10 +16,8 @@ printf '\n'
 
 if [ ! -r "$REPORT" ]; then
     printf '  DNS benchmark report not found.\n\n'
-    return 0 2>/dev/null || exit 0
-fi
-
-awk '
+else
+    awk '
 BEGIN {
     printf "  %-1s  %-30s %-8s %-15s %-4s %-5s\n", \
            "#", "DNS", "AVG", "IP", "TYPE", "OK"
@@ -46,6 +44,7 @@ END {
         printf "\n  No test date found.\n"
 }
 ' "$REPORT"
+fi
 
 printf '\n'
 DOH_REPORT="/root/dnstest/latest-doh.txt"

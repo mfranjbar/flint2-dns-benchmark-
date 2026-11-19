@@ -2,7 +2,7 @@ name: Validate DNS benchmark
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/doh-benchmark]
   pull_request:
     branches: [main]
 
@@ -28,6 +28,7 @@ jobs:
           busybox ash -n 40-dnstest-dashboard.sh
           busybox ash -n install.sh
           busybox ash -n uninstall.sh
+          busybox ash tests/test-doh.sh
 
       - name: Validate server lists and installer guards
         shell: bash

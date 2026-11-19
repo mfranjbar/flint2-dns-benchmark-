@@ -14,7 +14,11 @@ if [ "${1:-}" = "-h" ]; then
 fi
 i=0
 while [ "$i" -lt 36 ]; do
-    echo ";; ->>HEADER<<- opcode: QUERY; status: NOERROR; id: $i"
+    if [ "$i" -eq 14 ] || [ "$i" -eq 22 ]; then
+        echo ";; ->>HEADER<<- opcode: QUERY; status: SERVFAIL; id: $i"
+    else
+        echo ";; ->>HEADER<<- opcode: QUERY; status: NOERROR; id: $i"
+    fi
     echo ";; Query time: $((i % 9 + 1)) msec"
     i=$((i + 1))
 done
@@ -31,7 +35,8 @@ busybox ash "$ROOT/doh-bench.sh"
 REPORT="$TMP/reports/latest-doh.txt"
 test -s "$REPORT"
 grep -q 'DNS OVER HTTPS BENCHMARK / FLINT 2' "$REPORT"
-test "$(grep -c '24/24' "$REPORT")" -eq 16
+test "$(grep -c '22/24' "$REPORT")" -eq 16
+grep -q '5000.0' "$REPORT"
 # Verify average ordering is ascending.
 awk '/^[[:space:]]*[0-9]+[[:space:]]/ { avg=$5+0; if (seen && avg < prev) exit 1; prev=avg; seen=1; count++ } END { if (count != 16) exit 1 }' "$REPORT"
 echo 'DoH mock integration test: PASS'

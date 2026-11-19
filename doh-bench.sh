@@ -52,7 +52,7 @@ say() { printf '%s\n' "$*"; }
 fail() { say "ERROR: $*" >&2; exit 1; }
 
 cleanup() {
-    rm -f "$RAW" "$METRICS" "$ERRORS" "$TMP.report" "$TMP.servers" "$TMP.values" "$TMP.sorted" "$TMP.query."* "$TMP.response."*
+    rm -f "$RAW" "$METRICS" "$ERRORS" "$TMP.report" "$TMP.servers" "$TMP.values" "$TMP.sorted" "$TMP"/query.* "$TMP"/response.*
     rmdir "$TMP" 2>/dev/null
     rmdir "$LOCK" 2>/dev/null
 }
@@ -189,6 +189,7 @@ trap 'exit 129' HUP
 
 mkdir "$TMP" || fail 'Could not create temporary directory.'
 : > "$RAW"
+TOTAL_OK=0
 
 say
 say 'DNS OVER HTTPS BENCHMARK / FLINT 2'
@@ -283,30 +284,29 @@ while IFS='|' read -r NAME IP TLS_HOST DOH_PATH; do
         SAMPLE_COUNT=$((SAMPLE_COUNT + 1))
     done
 
-    if [ "$OK" -gt 0 ]; then
-        sort -n "$TMP.values" > "$TMP.sorted"
-        STATS="$(awk '
-            { a[NR]=$1; sum += $1 }
-            END {
-                n=NR
-                if (!n) exit 1
-                mid=int((n+1)/2)
-                if (n%2) median=a[mid]
-                else median=(a[n/2]+a[n/2+1])/2
-                printf "%.1f|%.1f|%.1f|%.1f", a[1], median, sum/n, a[n]
-            }
-        ' "$TMP.sorted")"
-        IFS='|' read -r MIN MEDIAN AVG MAX <<EOF2
+    TOTAL_OK=$((TOTAL_OK + OK))
+    [ "$OK" -gt 0 ] || say "  No verified DoH answers from $NAME (curl exit: $CURL_RC)"
+
+    sort -n "$TMP.values" > "$TMP.sorted"
+    STATS="$(awk '
+        { a[NR]=$1; sum += $1 }
+        END {
+            n=NR
+            if (!n) exit 1
+            mid=int((n+1)/2)
+            if (n%2) median=a[mid]
+            else median=(a[n/2]+a[n/2+1])/2
+            printf "%.1f|%.1f|%.1f|%.1f", a[1], median, sum/n, a[n]
+        }
+    ' "$TMP.sorted")"
+    IFS='|' read -r MIN MEDIAN AVG MAX <<EOF2
 $STATS
 EOF2
-        printf '%s|%s|%s|%s|%s|%s|%s\n' "$AVG" "$MEDIAN" "$MIN" "$MAX" \
-            "$OK/$TOTAL_SAMPLES" "$IP" "$NAME" >> "$RAW"
-    else
-        say "  No verified DoH answers from $NAME (curl exit: $CURL_RC)"
-    fi
+    printf '%s|%s|%s|%s|%s|%s|%s\n' "$AVG" "$MEDIAN" "$MIN" "$MAX" \
+        "$OK/$TOTAL_SAMPLES" "$IP" "$NAME" >> "$RAW"
 done < "$TMP.servers"
 
-[ -s "$RAW" ] || fail 'No DoH provider returned a verified NOERROR answer; previous report preserved.'
+[ "$TOTAL_OK" -gt 0 ] || fail 'No DoH provider returned a verified NOERROR answer; previous report preserved.'
 LAST_TEST="$(date '+%Y-%m-%d %H:%M:%S')"
 print_report > "$TMP.report" || fail 'Could not create DoH report.'
 [ -s "$TMP.report" ] || fail 'DoH report is empty.'

@@ -283,7 +283,7 @@ while IFS='|' read -r NAME IP TLS_HOST DOH_PATH METHOD; do
     timeout "$SERVER_LIMIT" "$CURL" "$@" > "$METRICS" 2> "$ERRORS"
     CURL_RC=$?
     if [ "$CURL_RC" -ne 0 ] && [ -s "$ERRORS" ]; then
-        say "  curl diagnostic: $(head -n 3 "$ERRORS" | tr '\\n' ' ')"
+        say "  curl diagnostic: $(tail -n 8 "$ERRORS" | tr '\\n' ' ')"
     fi
 
     IDX=0

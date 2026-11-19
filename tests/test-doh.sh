@@ -48,7 +48,26 @@ while [ "$#" -gt 0 ]; do
             shift 2
             ;;
         https://*)
-            case "$1" in *'?dns='*) GETS=$((GETS + 1));; esac
+            case "$1" in
+                *'?dns='*)
+                    GETS=$((GETS + 1))
+                    b64="${1##*dns=}"
+                    case $(("${#b64}" % 4)) in
+                        2) b64="$b64==";;
+                        3) b64="$b64=";;
+                    esac
+                    request="$out.request"
+                    printf '%s' "$b64" | tr '_-' '/+' | base64 -d > "$request"
+                    ( set -- $(od -An -tu1 -N6 "$request"); \
+                      [ "$#" -eq 6 ] && [ "$1" -eq "$hi" ] && [ "$2" -eq "$lo" ] && \
+                      [ "$3" -eq 1 ] && [ "$4" -eq 0 ] && [ "$5" -eq 0 ] && [ "$6" -eq 1 ] ) || exit 1
+                    size="$(wc -c < "$request" | tr -d ' ')"
+                    offset=$((size - 4))
+                    ( set -- $(od -An -tu1 -j "$offset" -N4 "$request"); \
+                      [ "$#" -eq 4 ] && [ "$1" -eq 0 ] && [ "$2" -eq 1 ] && \
+                      [ "$3" -eq 0 ] && [ "$4" -eq 1 ] ) || exit 1
+                    ;;
+            esac
             shift
             ;;
         *)

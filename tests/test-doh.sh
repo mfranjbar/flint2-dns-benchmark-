@@ -27,7 +27,7 @@ while [ "$#" -gt 0 ]; do
             id="${out##*.}"
             hi=$((id / 256))
             lo=$((id % 256))
-            if [ "$id" -eq 14 ] || [ "$id" -eq 22 ]; then
+            if [ "${FAKE_CURL_ALL_FAIL:-0}" = 1 ] || [ "$id" -eq 14 ] || [ "$id" -eq 22 ]; then
                 flags2=130
             else
                 flags2=128
@@ -62,4 +62,11 @@ grep -q 'DNS OVER HTTPS BENCHMARK / FLINT 2' "$REPORT"
 test "$(grep -c '22/24' "$REPORT")" -eq 16
 grep -q '5000.0' "$REPORT"
 awk '/^[[:space:]]*[0-9]+[[:space:]]/ { avg=$5+0; if (seen && avg < prev) exit 1; prev=avg; seen=1; count++ } END { if (count != 16) exit 1 }' "$REPORT"
-echo 'DoH mock integration test: PASS'
+cp "$REPORT" "$TMP/previous-report.txt"
+export FAKE_CURL_ALL_FAIL=1
+if busybox ash "$ROOT/doh-bench.sh"; then
+    echo 'Expected all-failed DoH test to return nonzero.' >&2
+    exit 1
+fi
+cmp -s "$REPORT" "$TMP/previous-report.txt"
+echo 'DoH mock integration and report-preservation tests: PASS'

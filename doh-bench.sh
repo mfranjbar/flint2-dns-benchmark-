@@ -115,7 +115,7 @@ build_dns_query() {
         printf '%s' "$BQ_LABEL" >> "$BQ_FILE" || return 1
     done
 
-    printf '\\000\\001\\000\\001' >> "$BQ_FILE"
+    printf '\000\001\000\001' >> "$BQ_FILE"
 }
 
 verify_dns_response() {

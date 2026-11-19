@@ -15,6 +15,7 @@ WARMUP_ROUNDS=1
 QUERY_TIMEOUT=5
 SERVER_LIMIT=240
 TIMEOUT_PENALTY=5000
+VERSION='2.0.0'
 DOMAINS='google.com youtube.com facebook.com instagram.com chatgpt.com x.com whatsapp.com reddit.com wikipedia.org amazon.com tiktok.com pinterest.com'
 
 # Name|IPv4|TLS hostname|DoH path|HTTP method
@@ -161,6 +162,11 @@ print_report() {
     say "Last test: $LAST_TEST"
 }
 
+if [ "${1:-}" = '--version' ]; then
+    say "Flint 2 DNS Benchmark DoH module v$VERSION"
+    exit 0
+fi
+
 if [ "${1:-}" = '--check' ]; then
     check_dependencies || exit 1
     say 'DoH pre-check: OK'
@@ -172,7 +178,7 @@ if [ "${1:-}" = '--check' ]; then
 fi
 
 if [ "${1:-}" = '--help' ]; then
-    say 'Usage: dnstest --doh [--check|--help]'
+    say 'Usage: dnstest --doh [--version|--check|--help]'
     say 'Runs the DoH benchmark only; classic UDP/TCP/DoT tests are unchanged.'
     exit 0
 fi

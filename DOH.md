@@ -12,8 +12,8 @@ The classic benchmark remains the default and is not replaced.
 
 ## Method
 
-- 16 public DoH endpoints, addressed by IPv4 with the TLS hostname pinned through curl's `--resolve`; this avoids using the router's current DNS to bootstrap the resolver hostname.
-- 12 test hostnames: google.com, youtube.com, facebook.com, instagram.com, chatgpt.com, x.com, whatsapp.com, reddit.com, wikipedia.org, amazon.com, tiktok.com, pinterest.com.
+- 26 public DoH endpoints (the 25 non-registration-required defaults from dnsspeedtest.online plus Mullvad), addressed by IPv4 with the TLS hostname pinned through curl's `--resolve`; this avoids using the router's current DNS to bootstrap the resolver hostname.
+- 12 test hostnames (same default host list as the reference site): google.com, youtube.com, facebook.com, instagram.com, chatgpt.com, x.com, whatsapp.com, reddit.com, wikipedia.org, amazon.com, tiktok.com, pinterest.com.
 - One warm-up query per hostname, followed by two measured rounds (24 measured samples).
 - All transfers for one resolver run inside a single curl process. curl's connection cache can therefore reuse the HTTPS connection between warm-up and measured requests.
 - HTTP 200 plus DNS transaction-ID, response-bit and NOERROR checks are required for a successful sample.

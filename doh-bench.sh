@@ -198,6 +198,16 @@ fi
 [ "$#" -eq 0 ] || fail 'Unknown argument. Use --help.'
 check_dependencies || exit 1
 
+for N in "$ROUNDS" "$WARMUP_ROUNDS" "$QUERY_TIMEOUT" "$SERVER_LIMIT"; do
+    case "$N" in ''|*[!0-9]*) fail 'Numeric DoH timing settings are invalid.';; esac
+done
+[ "$ROUNDS" -ge 1 ] || fail 'ROUNDS must be at least 1.'
+[ "$WARMUP_ROUNDS" -ge 1 ] || fail 'WARMUP_ROUNDS must be at least 1.'
+[ "$QUERY_TIMEOUT" -ge 1 ] || fail 'QUERY_TIMEOUT must be at least 1.'
+[ "$SERVER_LIMIT" -ge 1 ] || fail 'SERVER_LIMIT must be at least 1.'
+[ "$TOTAL_DOMAINS" -ge 1 ] || fail 'No test domains configured.'
+printf '%s\\n' "$DOH_SERVERS" | grep -q '|' || fail 'No DoH servers configured.'
+
 if [ "$HTTP2_ENABLED" -eq 1 ]; then
     HTTP_PROTOCOL='HTTP/2 when negotiated (HTTP/1.1 fallback)'
 else

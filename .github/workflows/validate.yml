@@ -44,6 +44,8 @@ jobs:
           grep -Fq -- '--next' doh-bench.sh
           grep -Fq -- '--resolve' doh-bench.sh
           grep -Fq 'verify_dns_response' doh-bench.sh
+          grep -Fq -- '--data-binary' doh-bench.sh
+          grep -Fq 'HTTP method' doh-bench.sh
           grep -Fq 'DNSTEST_CURL' doh-bench.sh
           grep -Fq 'doh-bench.sh' install.sh
           grep -Fq 'doh-bench.sh' uninstall.sh

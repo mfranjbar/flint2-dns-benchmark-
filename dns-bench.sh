@@ -360,6 +360,8 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 trap 'exit 129' HUP
 
+mkdir "$TMP" || fail 'Could not create temporary directory.'
+
 : > "$RAW"
 : > "$DOT_RAW"
 

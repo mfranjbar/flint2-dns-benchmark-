@@ -136,6 +136,8 @@ DNS_COUNT="$(sed -n "/^DNS_SERVERS='/,/^'$/p" "$WORK/dns-bench.sh" | grep -c '|'
 DOT_COUNT="$(sed -n "/^DOT_SERVERS='/,/^'$/p" "$WORK/dns-bench.sh" | grep -c '|')"
 [ "$DNS_COUNT" = 25 ] || die "DNS server count mismatch: $DNS_COUNT (expected 25)."
 [ "$DOT_COUNT" = 13 ] || die "DoT server count mismatch: $DOT_COUNT (expected 13)."
+DOH_COUNT="$(sed -n "/^DOH_SERVERS='/,/^'$/p" "$WORK/doh-bench.sh" | grep -c '|')"
+[ "$DOH_COUNT" = 16 ] || die "DoH server count mismatch: $DOH_COUNT (expected 16)."
 
 # Verify that the downloaded files belong to this project version.
 grep -q 'mkdir "\$TMP"' "$WORK/dns-bench.sh" || die 'Benchmark is missing temporary-directory creation.'
@@ -148,6 +150,9 @@ grep -Fq 'case "$-" in *i*)' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard i
 grep -Fq '[ -n "${SSH_CONNECTION:-}" ]' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard SSH-only guard is missing.'
 grep -q '\$1 <= 4' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard TOP 4 filter is missing.'
 grep -q 'No test date found.' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard missing-date handling is missing.'
+grep -Fq '+keepopen' "$WORK/doh-bench.sh" || die 'DoH warm-connection option is missing.'
+grep -Fq '+https=$DOH_PATH' "$WORK/doh-bench.sh" || die 'DoH HTTPS mode is missing.'
+grep -Fq '--doh' "$WORK/dns-bench.sh" || die 'Main command is missing DoH dispatch.'
 
 say
 say '===== STEP 4: CHECK / INSTALL NL ====='

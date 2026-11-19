@@ -180,6 +180,7 @@ grep -q 'No test date found.' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard 
 grep -Fq -- '--next' "$WORK/doh-bench.sh" || die 'DoH connection reuse option is missing.'
 grep -Fq -- '--resolve' "$WORK/doh-bench.sh" || die 'DoH direct endpoint resolution is missing.'
 grep -Fq 'verify_dns_response' "$WORK/doh-bench.sh" || die 'DoH response verification is missing.'
+grep -Fq -- '--data-binary' "$WORK/doh-bench.sh" || die 'DoH POST support is missing.'
 grep -Fq -- '--doh' "$WORK/dns-bench.sh" || die 'Main command is missing DoH dispatch.'
 
 say

@@ -330,7 +330,19 @@ while IFS='|' read -r NAME IP TLS_HOST DOH_PATH METHOD; do
     done
 
     TOTAL_OK=$((TOTAL_OK + OK))
-    [ "$OK" -gt 0 ] || say "  No verified DoH answers from $NAME (curl exit: $CURL_RC)"
+    if [ "$OK" -eq 0 ]; then
+        DEBUG_IDX=$((WARMUP_COUNT + 1))
+        DEBUG_FILE="$TMP/response.$DEBUG_IDX"
+        DEBUG_METRIC="$(sed -n "${DEBUG_IDX}p" "$METRICS")"
+        DEBUG_SIZE=0
+        DEBUG_HEADER='no response body'
+        if [ -s "$DEBUG_FILE" ]; then
+            DEBUG_SIZE="$(wc -c < "$DEBUG_FILE" | tr -d ' ')"
+            DEBUG_HEADER="$(od -An -tu1 -N12 "$DEBUG_FILE" 2>/dev/null | tr '\\n' ' ')"
+        fi
+        say "  No verified DoH answers from $NAME (curl exit: $CURL_RC)"
+        say "  Debug first scored request: metric=$DEBUG_METRIC bytes=$DEBUG_SIZE DNS-header=$DEBUG_HEADER"
+    fi
 
     sort -n "$TMP.values" > "$TMP.sorted"
     STATS="$(awk '

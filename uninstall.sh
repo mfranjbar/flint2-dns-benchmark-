@@ -1,6 +1,6 @@
 #!/bin/ash
 # FLINT 2 DNS BENCHMARK - SAFE UNINSTALLER
-# Removes only this project's installed script, command symlink, and SSH dashboard.
+# Removes only this project's benchmark scripts, command symlink, and SSH dashboard.
 # Preserves reports, backups, /root/dnstest directory, and installed packages.
 
 set -u

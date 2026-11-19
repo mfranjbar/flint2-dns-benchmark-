@@ -12,9 +12,14 @@ ROUNDS=2
 QUERY_TIMEOUT=3
 DOT_TIMEOUT=4
 HARD_LIMIT=8
+VERSION='2.0.0'
 
 # Optional DoH module. The classic benchmark remains the default.
 case "${1:-}" in
+    --version)
+        echo "Flint 2 DNS Benchmark v$VERSION"
+        exit 0
+        ;;
     --doh)
         shift
         exec "$DIR/doh-bench.sh" "$@"
@@ -359,7 +364,7 @@ if [ "$1" = --check ]; then
 fi
 
 if [ "$1" = --help ]; then
-    echo 'Usage: dnstest [--check|--help|--doh [--check]|--all]'
+    echo 'Usage: dnstest [--version|--check|--help|--doh [--check]|--all]'
     exit 0
 fi
 

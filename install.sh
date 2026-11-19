@@ -39,6 +39,27 @@ install_nl() {
     say "nl installed: $(command -v nl)"
 }
 
+install_timeout() {
+    if command -v timeout >/dev/null 2>&1; then
+        timeout 1 sh -c 'exit 0' >/dev/null 2>&1 || die 'timeout exists but failed its execution test.'
+        say "timeout already installed: $(command -v timeout)"
+        return 0
+    fi
+
+    say 'timeout is missing. Installing package coreutils-timeout...'
+    if command -v apk >/dev/null 2>&1; then
+        apk add coreutils-timeout || die 'Could not install coreutils-timeout with apk. Check package repository/index and internet access, then rerun the installer.'
+    elif command -v opkg >/dev/null 2>&1; then
+        opkg install coreutils-timeout || die 'Could not install coreutils-timeout with opkg. Check package feeds and internet access, then rerun the installer.'
+    else
+        die 'Neither apk nor opkg was found; cannot install timeout automatically.'
+    fi
+
+    command -v timeout >/dev/null 2>&1 || die 'Package installation finished, but timeout was not found.'
+    timeout 1 sh -c 'exit 0' >/dev/null 2>&1 || die 'timeout was installed but failed its execution test.'
+    say "timeout installed and verified: $(command -v timeout)"
+}
+
 install_kdig() {
     if [ -x /usr/bin/kdig ]; then
         say 'kdig already installed: /usr/bin/kdig'
@@ -129,7 +150,11 @@ say '===== STEP 4: CHECK / INSTALL NL ====='
 install_nl
 
 say
-say '===== STEP 5: CHECK / INSTALL KDIG ====='
+say '===== STEP 5: CHECK / INSTALL TIMEOUT ====='
+install_timeout
+
+say
+say '===== STEP 6: CHECK / INSTALL KDIG ====='
 install_kdig
 
 if [ -f "$SCRIPT" ] || [ -f "$DASHBOARD" ]; then
@@ -140,7 +165,7 @@ if [ -f "$SCRIPT" ] || [ -f "$DASHBOARD" ]; then
 fi
 
 say
-say '===== STEP 6: BACK UP / INSTALL FILES ====='
+say '===== STEP 7: BACK UP / INSTALL FILES ====='
 # Stage both files on their destination filesystems, then replace the live files.
 SCRIPT_STAGE="$DIR/.dns-bench.sh.new-$RUN_ID"
 DASH_STAGE="/etc/profile.d/.40-dnstest-dashboard.sh.new-$RUN_ID"
@@ -163,7 +188,7 @@ grep -q 'REPORT="/root/dnstest/latest-top4.txt"' "$DASHBOARD" || die 'Installed 
 [ -x /usr/bin/kdig ] || die 'kdig is not executable at /usr/bin/kdig.'
 
 say
-say '===== STEP 7: PRE-CHECK ====='
+say '===== STEP 8: PRE-CHECK ====='
 if dnstest --check; then
     say 'Pre-check: OK'
 else
@@ -182,6 +207,7 @@ say 'Command:     dnstest'
 [ -d "$BACKUP" ] && say "Backup:      $BACKUP"
 say
 say 'nl installation: verified'
+say 'timeout installation: verified'
 say 'kdig installation: verified'
 say 'Benchmark directory: created and verified'
 say 'DNS benchmark was NOT started.'

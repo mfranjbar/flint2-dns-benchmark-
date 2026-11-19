@@ -20,7 +20,7 @@ Connect to Flint 2 over SSH and run this command as root:
 wget -O /tmp/install.sh https://raw.githubusercontent.com/mfranjbar/flint2-dns-benchmark-/main/install.sh && ash /tmp/install.sh
 ```
 
-The installer automatically installs **nl** (the `coreutils-nl` package) **timeout** (the `coreutils-timeout` package), and **kdig** (the `knot-dig` package) if either is missing, then downloads the benchmark and SSH dashboard. It checks shell syntax and server counts, creates and verifies `/root/dnstest`, backs up existing project files, and creates the `dnstest` command.
+The installer automatically installs **nl** (the `coreutils-nl` package), **timeout** (the `coreutils-timeout` package), and **kdig** (the `knot-dig` package) if either is missing, then downloads the benchmark and SSH dashboard. It checks shell syntax and server counts, creates and verifies `/root/dnstest`, backs up existing project files, and creates the `dnstest` command.
 
 On OpenWrt 25.12, it uses `apk add coreutils-nl`, `apk add coreutils-timeout`, and `apk add knot-dig` as needed. It does not run `apk update`; if a required package index is unavailable, refresh the package index and rerun the installer.
 

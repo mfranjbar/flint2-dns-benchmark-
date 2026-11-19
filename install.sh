@@ -66,7 +66,10 @@ mkdir -p "$DIR" "$BACKUP_ROOT" /etc/profile.d "$WORK" || die 'Could not create r
 [ -d "$DIR" ] && [ -w "$DIR" ] || die "Benchmark directory is not writable: $DIR"
 say "Benchmark directory ready: $DIR"
 
-cleanup() { rm -rf "$WORK"; }
+cleanup() {
+    rm -f "$DIR/.dns-bench.sh.new-$STAMP" "/etc/profile.d/.40-dnstest-dashboard.sh.new-$STAMP"
+    rm -rf "$WORK"
+}
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM

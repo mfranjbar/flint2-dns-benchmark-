@@ -1,5 +1,5 @@
 #!/bin/ash
-set -eu
+set -eux
 ROOT="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
 TMP="$(mktemp -d)"
 cleanup() { rm -rf "$TMP"; }

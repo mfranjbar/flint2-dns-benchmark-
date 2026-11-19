@@ -13,8 +13,9 @@ SCRIPT="$DIR/dns-bench.sh"
 DASHBOARD='/etc/profile.d/40-dnstest-dashboard.sh'
 BACKUP_ROOT='/root/backup/dns'
 STAMP="$(date '+%Y%m%d-%H%M%S')"
-BACKUP="$BACKUP_ROOT/flint2-$STAMP"
-WORK="/tmp/flint2-dns-install-$$"
+RUN_ID="$STAMP-$"
+BACKUP="$BACKUP_ROOT/flint2-$RUN_ID"
+WORK="/tmp/flint2-dns-install-$RUN_ID"
 
 say() { printf '%s\n' "$*"; }
 die() { say "ERROR: $*"; exit 1; }
@@ -67,7 +68,7 @@ mkdir -p "$DIR" "$BACKUP_ROOT" /etc/profile.d "$WORK" || die 'Could not create r
 say "Benchmark directory ready: $DIR"
 
 cleanup() {
-    rm -f "$DIR/.dns-bench.sh.new-$STAMP" "/etc/profile.d/.40-dnstest-dashboard.sh.new-$STAMP"
+    rm -f "$DIR/.dns-bench.sh.new-$RUN_ID" "/etc/profile.d/.40-dnstest-dashboard.sh.new-$RUN_ID"
     rm -rf "$WORK"
 }
 trap cleanup EXIT
@@ -94,8 +95,12 @@ DOT_COUNT="$(sed -n "/^DOT_SERVERS='/,/^'$/p" "$WORK/dns-bench.sh" | grep -c '|'
 
 # Verify that the downloaded files belong to this project version.
 grep -q 'mkdir "\$TMP"' "$WORK/dns-bench.sh" || die 'Benchmark is missing temporary-directory creation.'
+grep -q 'REPORT="$DIR/latest-top4.txt"' "$WORK/dns-bench.sh" || die 'Benchmark report path is not the expected path.'
 grep -q 'REPORT="/root/dnstest/latest-top4.txt"' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard report path does not match the benchmark.'
 grep -q 'DNS benchmark SSH dashboard' "$WORK/40-dnstest-dashboard.sh" || die 'Downloaded SSH dashboard is not the expected dashboard.'
+grep -q 'TOP 4 DNS + BEST DoT' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard title is missing.'
+grep -q 'DNS OVER TLS DOWN' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard DoT fallback row is missing.'
+grep -q 'No test date found.' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard missing-date handling is missing.'
 
 if [ -f "$SCRIPT" ] || [ -f "$DASHBOARD" ]; then
     mkdir -p "$BACKUP" || die 'Could not create backup directory.'
@@ -107,8 +112,8 @@ fi
 say
 say '===== STEP 5: INSTALL FILES ====='
 # Stage both files on their destination filesystems, then replace the live files.
-SCRIPT_STAGE="$DIR/.dns-bench.sh.new-$STAMP"
-DASH_STAGE="/etc/profile.d/.40-dnstest-dashboard.sh.new-$STAMP"
+SCRIPT_STAGE="$DIR/.dns-bench.sh.new-$RUN_ID"
+DASH_STAGE="/etc/profile.d/.40-dnstest-dashboard.sh.new-$RUN_ID"
 cp "$WORK/dns-bench.sh" "$SCRIPT_STAGE" || die 'Could not stage benchmark.'
 cp "$WORK/40-dnstest-dashboard.sh" "$DASH_STAGE" || die 'Could not stage SSH dashboard.'
 chmod 755 "$SCRIPT_STAGE" || die 'Could not set benchmark permissions.'

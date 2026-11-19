@@ -26,6 +26,16 @@ On OpenWrt 25.12, it uses `apk add knot-dig`. It does not run `apk update`; if t
 
 The installer does **not** start a benchmark or change DNS, firewall, network, or service settings. Installing `knot-dig` may install its required package dependencies.
 
+## Uninstall
+
+To remove only the benchmark script, its command symlink, and the SSH dashboard, run:
+
+```sh
+wget -O /tmp/uninstall.sh https://raw.githubusercontent.com/mfranjbar/flint2-dns-benchmark-/main/uninstall.sh && ash /tmp/uninstall.sh
+```
+
+The uninstaller requires typing `YES` for confirmation. It preserves `/root/dnstest/`, benchmark reports, `/root/backup/dns/`, and installed packages (including `knot-dig`). It does not change DNS, firewall, network, or service settings.
+
 ## Usage
 
 After installation:
@@ -36,7 +46,7 @@ dnstest --help
 dnstest
 ```
 
-The benchmark also requires `timeout`, `nl`, standard BusyBox tools, and a CA certificate bundle at either:
+The benchmark also requires `timeout`, `awk`, standard BusyBox tools, and a CA certificate bundle at either:
 
 - `/etc/ssl/cert.pem`
 - `/etc/ssl/certs/ca-certificates.crt`

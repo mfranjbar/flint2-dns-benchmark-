@@ -17,25 +17,25 @@ SERVER_LIMIT=240
 TIMEOUT_PENALTY=5000
 DOMAINS='google.com youtube.com facebook.com instagram.com chatgpt.com x.com whatsapp.com reddit.com wikipedia.org amazon.com tiktok.com pinterest.com'
 
-# Name|IPv4|TLS hostname|DoH path
+# Name|IPv4|TLS hostname|DoH path|HTTP method
 # All endpoints use RFC 8484 wire-format DoH over HTTPS GET.
 DOH_SERVERS='
-Cloudflare|1.1.1.1|cloudflare-dns.com|/dns-query
-Google|8.8.8.8|dns.google|/dns-query
-Quad9|9.9.9.9|dns.quad9.net|/dns-query
-AdGuard|94.140.14.14|dns.adguard-dns.com|/dns-query
-DNS-SB|185.222.222.222|doh.dns.sb|/dns-query
-Mullvad|194.242.2.2|dns.mullvad.net|/dns-query
-LibreDNS|116.202.176.26|doh.libredns.gr|/dns-query
-ControlD|76.76.2.0|freedns.controld.com|/p0
-OpenDNS|208.67.222.222|doh.opendns.com|/dns-query
-Digitale-Gesellschaft|185.95.218.42|dns.digitale-gesellschaft.ch|/dns-query
-DNS4EU|86.54.11.100|unfiltered.joindns4.eu|/dns-query
-IIJ|203.180.164.45|public.dns.iij.jp|/dns-query
-UncensoredDNS|91.239.100.100|anycast.uncensoreddns.org|/dns-query
-Switch|130.59.31.248|dns.switch.ch|/dns-query
-OpenBLD|146.112.41.2|ada.openbld.net|/dns-query
-Canadian-Shield|149.112.121.10|private.canadianshield.cira.ca|/dns-query
+Cloudflare|1.1.1.1|cloudflare-dns.com|/dns-query|GET
+Google|8.8.8.8|dns.google|/dns-query|GET
+Quad9|9.9.9.9|dns.quad9.net|/dns-query|POST
+AdGuard|94.140.14.14|dns.adguard-dns.com|/dns-query|POST
+DNS-SB|185.222.222.222|doh.dns.sb|/dns-query|GET
+Mullvad|194.242.2.2|dns.mullvad.net|/dns-query|POST
+LibreDNS|116.202.176.26|doh.libredns.gr|/dns-query|POST
+ControlD|76.76.2.0|freedns.controld.com|/p0|POST
+OpenDNS|208.67.222.222|doh.opendns.com|/dns-query|POST
+Digitale-Gesellschaft|185.95.218.42|dns.digitale-gesellschaft.ch|/dns-query|POST
+DNS4EU|86.54.11.100|unfiltered.joindns4.eu|/dns-query|POST
+IIJ|203.180.164.45|public.dns.iij.jp|/dns-query|POST
+UncensoredDNS|91.239.100.100|anycast.uncensoreddns.org|/dns-query|POST
+Switch|130.59.31.248|dns.switch.ch|/dns-query|POST
+OpenBLD|146.112.41.2|ada.openbld.net|/dns-query|POST
+Canadian-Shield|149.112.121.10|private.canadianshield.cira.ca|/dns-query|POST
 '
 
 TMP="/tmp/flint-doh-$$"
@@ -206,7 +206,7 @@ say 'Please wait...'
 
 printf '%s\n' "$DOH_SERVERS" > "$TMP.servers"
 
-while IFS='|' read -r NAME IP TLS_HOST DOH_PATH; do
+while IFS='|' read -r NAME IP TLS_HOST DOH_PATH METHOD; do
     [ -n "$NAME" ] || continue
 
     : > "$TMP.values"
@@ -231,7 +231,11 @@ while IFS='|' read -r NAME IP TLS_HOST DOH_PATH; do
                 --cacert "$CA_FILE" -H 'accept: application/dns-message' \
                 -o "$RESPONSE_FILE" -w '%{time_total}|%{http_code}\n'
             [ "$HTTP2_ENABLED" -eq 0 ] || set -- "$@" --http2
-            set -- "$@" "$SERVER_URL?dns=$DNS_B64"
+            if [ "$METHOD" = POST ]; then
+                set -- "$@" -H 'content-type: application/dns-message' --data-binary "@$QUERY_FILE" "$SERVER_URL"
+            else
+                set -- "$@" "$SERVER_URL?dns=$DNS_B64"
+            fi
         done
         ROUND=$((ROUND + 1))
     done

@@ -20,11 +20,15 @@ Connect to Flint 2 over SSH and run this command as root:
 wget -O /tmp/install.sh https://raw.githubusercontent.com/mfranjbar/flint2-dns-benchmark-/main/install.sh && ash /tmp/install.sh
 ```
 
-This single command downloads the installer to `/tmp/install.sh` and runs it with the OpenWrt shell (`ash`). The installer downloads the benchmark and SSH dashboard, checks shell syntax and server counts, backs up existing files, and creates the `dnstest` command.
+The installer automatically installs **kdig** (the `knot-dig` package) if it is missing, then downloads the benchmark and SSH dashboard. It checks shell syntax and server counts, creates and verifies `/root/dnstest`, backs up existing project files, and creates the `dnstest` command.
 
-It does **not** install packages, start a benchmark, or change DNS, firewall, network, or service settings.
+On OpenWrt 25.12, it uses `apk add knot-dig`. It does not run `apk update`; if the package index is unavailable, refresh the package index and rerun the installer.
+
+The installer does **not** start a benchmark or change DNS, firewall, network, or service settings. Installing `knot-dig` may install its required package dependencies.
 
 ## Usage
+
+After installation:
 
 ```sh
 dnstest --check
@@ -32,13 +36,14 @@ dnstest --help
 dnstest
 ```
 
-The benchmark requires `kdig`, `timeout`, `nl`, standard BusyBox tools, and a CA certificate bundle at either:
+The benchmark also requires `timeout`, `nl`, standard BusyBox tools, and a CA certificate bundle at either:
 
 - `/etc/ssl/cert.pem`
 - `/etc/ssl/certs/ca-certificates.crt`
 
 ## Installed paths
 
+- Benchmark directory: `/root/dnstest/`
 - Benchmark: `/root/dnstest/dns-bench.sh`
 - Report: `/root/dnstest/latest-top4.txt`
 - Command: `/usr/bin/dnstest`

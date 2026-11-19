@@ -104,8 +104,8 @@ fi
 say
 say '===== STEP 5: INSTALL FILES ====='
 # Stage both files on their destination filesystems, then replace the live files.
-SCRIPT_STAGE="$DIR/.dns-bench.sh.new.$"
-DASH_STAGE="/etc/profile.d/.40-dnstest-dashboard.sh.new.$"
+SCRIPT_STAGE="$DIR/.dns-bench.sh.new-$STAMP"
+DASH_STAGE="/etc/profile.d/.40-dnstest-dashboard.sh.new-$STAMP"
 cp "$WORK/dns-bench.sh" "$SCRIPT_STAGE" || die 'Could not stage benchmark.'
 cp "$WORK/40-dnstest-dashboard.sh" "$DASH_STAGE" || die 'Could not stage SSH dashboard.'
 chmod 755 "$SCRIPT_STAGE" || die 'Could not set benchmark permissions.'

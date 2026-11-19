@@ -9,6 +9,7 @@ mkdir -p "$TMP/bin" "$TMP/reports"
 
 cat > "$TMP/bin/curl" <<'MOCK'
 #!/bin/sh
+set -x
 case "${1:-}" in
     --version)
         echo 'curl 8.10.1 fake Protocols: https Features: HTTP2'

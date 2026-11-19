@@ -63,6 +63,9 @@ while [ "$#" -gt 0 ]; do
                           [ "$#" -eq 6 ] && [ "$1" -eq "$hi" ] && [ "$2" -eq "$lo" ] && \
                           [ "$3" -eq 1 ] && [ "$4" -eq 0 ] && [ "$5" -eq 0 ] && [ "$6" -eq 1 ] ) || exit 1
                         size="$(wc -c < "$request" | tr -d ' ')"
+                        root_offset=$((size - 5))
+                        root_byte="$(od -An -tu1 -j "$root_offset" -N1 "$request" | tr -d ' ')"
+                        [ "$root_byte" -eq 0 ] || exit 1
                         offset=$((size - 4))
                         ( set -- $(od -An -tu1 -j "$offset" -N4 "$request"); \
                           [ "$#" -eq 4 ] && [ "$1" -eq 0 ] && [ "$2" -eq 1 ] && \

@@ -55,4 +55,4 @@ if [ -r "$DOH_REPORT" ]; then
     printf '\n'
 fi
 
-printf '\\n'
+printf '\n'

@@ -90,6 +90,11 @@ check_dependencies() {
         return 1
     }
 
+    "$CURL" --help all 2>&1 | grep -q -- '--write-out' || {
+        say 'curl does not support --write-out timing output.'
+        return 1
+    }
+
     "$CURL" --version 2>&1 | grep -q 'HTTP2' && HTTP2_ENABLED=1
     return 0
 }

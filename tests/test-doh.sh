@@ -33,5 +33,5 @@ test -s "$REPORT"
 grep -q 'DNS OVER HTTPS BENCHMARK / FLINT 2' "$REPORT"
 test "$(grep -c '24/24' "$REPORT")" -eq 16
 # Verify average ordering is ascending.
-awk -F'|' '/^[0-9]+\./ { if (seen && ($1+0) < (prev+0)) exit 1; prev=$1; seen=1 }' "$REPORT" && exit 1 || :
+awk '/^[[:space:]]*[0-9]+[[:space:]]/ { avg=$5+0; if (seen && avg < prev) exit 1; prev=avg; seen=1; count++ } END { if (count != 16) exit 1 }' "$REPORT"
 echo 'DoH mock integration test: PASS'

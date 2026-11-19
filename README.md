@@ -20,9 +20,9 @@ Connect to Flint 2 over SSH and run this command as root:
 wget -O /tmp/install.sh https://raw.githubusercontent.com/mfranjbar/flint2-dns-benchmark-/main/install.sh && ash /tmp/install.sh
 ```
 
-The installer automatically installs **nl** (the `coreutils-nl` package) and **kdig** (the `knot-dig` package) if either is missing, then downloads the benchmark and SSH dashboard. It checks shell syntax and server counts, creates and verifies `/root/dnstest`, backs up existing project files, and creates the `dnstest` command.
+The installer automatically installs **nl** (the `coreutils-nl` package) **timeout** (the `coreutils-timeout` package), and **kdig** (the `knot-dig` package) if either is missing, then downloads the benchmark and SSH dashboard. It checks shell syntax and server counts, creates and verifies `/root/dnstest`, backs up existing project files, and creates the `dnstest` command.
 
-On OpenWrt 25.12, it uses `apk add coreutils-nl` and `apk add knot-dig` as needed. It does not run `apk update`; if a required package index is unavailable, refresh the package index and rerun the installer.
+On OpenWrt 25.12, it uses `apk add coreutils-nl`, `apk add coreutils-timeout`, and `apk add knot-dig` as needed. It does not run `apk update`; if a required package index is unavailable, refresh the package index and rerun the installer.
 
 The installer does **not** start a benchmark or change DNS, firewall, network, or service settings. Installing `knot-dig` may install its required package dependencies.
 
@@ -34,7 +34,7 @@ To remove only the benchmark script, its command symlink, and the SSH dashboard,
 wget -O /tmp/uninstall.sh https://raw.githubusercontent.com/mfranjbar/flint2-dns-benchmark-/main/uninstall.sh && ash /tmp/uninstall.sh
 ```
 
-The uninstaller requires typing `YES` for confirmation. It preserves `/root/dnstest/`, benchmark reports, `/root/backup/dns/`, and installed packages (including `knot-dig` and `coreutils-nl`). It does not change DNS, firewall, network, or service settings.
+The uninstaller requires typing `YES` for confirmation. It preserves `/root/dnstest/`, benchmark reports, `/root/backup/dns/`, and installed packages (including `knot-dig`, `coreutils-nl`, and `coreutils-timeout`). It does not change DNS, firewall, network, or service settings.
 
 ## Usage
 
@@ -46,7 +46,7 @@ dnstest --help
 dnstest
 ```
 
-The benchmark also requires `nl`, `timeout`, `awk`, standard BusyBox tools, and a CA certificate bundle at either:
+The benchmark also requires `nl`, `timeout` (provided by `coreutils-timeout`), `awk`, standard BusyBox tools, and a CA certificate bundle at either:
 
 - `/etc/ssl/cert.pem`
 - `/etc/ssl/certs/ca-certificates.crt`

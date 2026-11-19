@@ -21,8 +21,8 @@ die() { say "ERROR: $*"; exit 1; }
 
 
 install_kdig() {
-    if command -v kdig >/dev/null 2>&1; then
-        say "kdig already installed: $(command -v kdig)"
+    if [ -x /usr/bin/kdig ]; then
+        say 'kdig already installed: /usr/bin/kdig'
         return 0
     fi
 
@@ -35,8 +35,8 @@ install_kdig() {
         die 'Neither apk nor opkg was found; cannot install kdig automatically.'
     fi
 
-    command -v kdig >/dev/null 2>&1 || die 'Package installation finished, but kdig command was not found.'
-    say "kdig installed: $(command -v kdig)"
+    [ -x /usr/bin/kdig ] || die 'Package installation finished, but /usr/bin/kdig was not found.'
+    say 'kdig installed: /usr/bin/kdig'
 }
 
 fetch() {
@@ -70,11 +70,7 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-say '===== STEP 1: CHECK / INSTALL KDIG ====='
-install_kdig
-
-say
-say '===== STEP 2: PREPARE DIRECTORIES ====='
+say '===== STEP 1: PREPARE DIRECTORIES ====='
 mkdir -p "$DIR" "$BACKUP_ROOT" /etc/profile.d "$WORK" || die 'Could not create required directories.'
 [ -d "$DIR" ] && [ -w "$DIR" ] || die "Benchmark directory is not writable: $DIR"
 say "Benchmark directory ready: $DIR"
@@ -106,6 +102,10 @@ grep -q 'TOP 4 DNS + BEST DoT' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard
 grep -q 'DNS OVER TLS DOWN' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard DoT fallback row is missing.'
 grep -q 'No test date found.' "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard missing-date handling is missing.'
 
+say
+say '===== STEP 4: CHECK / INSTALL KDIG ====='
+install_kdig
+
 if [ -f "$SCRIPT" ] || [ -f "$DASHBOARD" ]; then
     mkdir -p "$BACKUP" || die 'Could not create backup directory.'
     [ ! -f "$SCRIPT" ] || cp -p "$SCRIPT" "$BACKUP/dns-bench.sh" || die 'Could not back up existing benchmark.'
@@ -114,7 +114,7 @@ if [ -f "$SCRIPT" ] || [ -f "$DASHBOARD" ]; then
 fi
 
 say
-say '===== STEP 5: INSTALL FILES ====='
+say '===== STEP 5: BACK UP / INSTALL FILES ====='
 # Stage both files on their destination filesystems, then replace the live files.
 SCRIPT_STAGE="$DIR/.dns-bench.sh.new-$RUN_ID"
 DASH_STAGE="/etc/profile.d/.40-dnstest-dashboard.sh.new-$RUN_ID"

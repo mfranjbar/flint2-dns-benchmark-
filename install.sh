@@ -76,7 +76,7 @@ mkdir -p "$DIR" "$BACKUP_ROOT" /etc/profile.d "$WORK" || die 'Could not create r
 say "Benchmark directory ready: $DIR"
 
 say
-say '===== STEP 3: DOWNLOAD PROJECT FILES ====='
+say '===== STEP 2: DOWNLOAD PROJECT FILES ====='
 fetch "$RAW_BASE/dns-bench.sh" "$WORK/dns-bench.sh" || die 'Could not download dns-bench.sh.'
 fetch "$RAW_BASE/40-dnstest-dashboard.sh" "$WORK/40-dnstest-dashboard.sh" || die 'Could not download dashboard.'
 
@@ -84,7 +84,7 @@ fetch "$RAW_BASE/40-dnstest-dashboard.sh" "$WORK/40-dnstest-dashboard.sh" || die
 [ -s "$WORK/40-dnstest-dashboard.sh" ] || die 'Downloaded dashboard is empty.'
 
 say
-say '===== STEP 4: CHECK SHELL SYNTAX / SERVER COUNTS ====='
+say '===== STEP 3: CHECK SHELL SYNTAX / SERVER COUNTS ====='
 ash -n "$WORK/dns-bench.sh" || die 'Benchmark shell syntax check failed.'
 ash -n "$WORK/40-dnstest-dashboard.sh" || die 'Dashboard shell syntax check failed.'
 

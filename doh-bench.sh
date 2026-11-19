@@ -93,6 +93,11 @@ check_dependencies() {
         return 1
     }
 
+    "$CURL" --help all 2>&1 | grep -q -- '--noproxy' || {
+        say 'curl does not support --noproxy; direct endpoint testing cannot be guaranteed.'
+        return 1
+    }
+
     "$CURL" --help all 2>&1 | grep -q -- '--resolve' || {
         say 'curl does not support --resolve; direct-IP TLS testing is unavailable.'
         return 1
